@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Boost Dashboard · EsportivaBet</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:     #0a0a0a;
+  --bg2:    #141414;
+  --bg3:    #1e1e1e;
+  --bg4:    #252525;
+  --border: #2a2a2a;
+  --bord2:  #333;
+  --text:   #ffffff;
+  --t2:     #888;
+  --t3:     #555;
+  --orange: #FF5500;
+  --ora2:   #FF7733;
+  --green:  #22c55e;
+  --red:    #ef4444;
+  --yellow: #f59e0b;
+  --r: 6px;
+}
+body { background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui,sans-serif; font-size:13px; min-height:100vh; }
+
+/* TOPBAR */
+.topbar { background:var(--bg2); border-bottom:1px solid var(--border); padding:0 28px; height:52px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; }
+.logo { display:flex; align-items:center; gap:8px; font-size:15px; font-weight:800; }
+.logo .arr { color:var(--orange); font-size:18px; }
+.logo .brand span { color:var(--orange); }
+.nav-tabs { display:flex; gap:2px; background:var(--bg3); padding:3px; border-radius:var(--r); }
+.nav-tab { padding:6px 18px; border-radius:4px; cursor:pointer; font-size:12px; font-weight:700; color:var(--t2); transition:all .15s; user-select:none; }
+.nav-tab:hover { color:var(--text); }
+.nav-tab.active { background:var(--orange); color:#fff; }
+
+/* PAGES */
+.page { display:none; padding:24px 28px; max-width:1440px; margin:0 auto; }
+.page.active { display:block; }
+
+/* DROPZONE */
+.dropzone { border:1.5px dashed var(--bord2); border-radius:8px; padding:56px 32px; text-align:center; cursor:pointer; transition:all .2s; background:var(--bg2); }
+.dropzone:hover,.dropzone.drag { border-color:var(--orange); background:rgba(255,85,0,.04); }
+.dz-icon { font-size:36px; margin-bottom:14px; opacity:.6; }
+.dropzone h3 { font-size:15px; font-weight:700; margin-bottom:6px; }
+.dropzone p { color:var(--t2); font-size:12px; }
+#fileInput { display:none; }
+
+/* INFO STRIP */
+.info-strip { display:flex; align-items:stretch; background:var(--bg2); border:1px solid var(--border); border-radius:var(--r); margin-bottom:16px; overflow:hidden; flex-wrap:wrap; }
+.date-field { display:flex; align-items:center; gap:8px; padding:12px 18px; border-right:1px solid var(--border); }
+.date-field label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.6px; color:var(--t2); white-space:nowrap; }
+.date-input { background:var(--bg3); border:1px solid var(--bord2); color:var(--text); padding:5px 10px; border-radius:4px; font-size:13px; width:110px; }
+.date-input:focus { outline:none; border-color:var(--orange); }
+.info-cell { padding:12px 20px; border-right:1px solid var(--border); flex:1; min-width:110px; }
+.info-cell:last-child { border-right:none; }
+.info-cell .lbl { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.6px; color:var(--t2); margin-bottom:4px; }
+.info-cell .val { font-size:17px; font-weight:800; }
+.val.orange { color:var(--orange); }
+.val.green  { color:var(--green); }
+.val.red    { color:var(--red); }
+
+/* TOOLBAR */
+.toolbar { display:flex; align-items:center; gap:8px; margin-bottom:12px; flex-wrap:wrap; }
+.search-wrap { position:relative; }
+.search-wrap::before { content:'⌕'; position:absolute; left:10px; top:50%; transform:translateY(-50%); color:var(--t3); pointer-events:none; font-size:15px; }
+.search { background:var(--bg2); border:1px solid var(--border); color:var(--text); padding:7px 12px 7px 32px; border-radius:var(--r); font-size:13px; width:260px; }
+.search:focus { outline:none; border-color:var(--bord2); }
+.search::placeholder { color:var(--t3); }
+
+/* BUTTONS */
+.btn { display:inline-flex; align-items:center; gap:5px; padding:7px 14px; border-radius:var(--r); border:none; cursor:pointer; font-size:12px; font-weight:700; letter-spacing:.2px; transition:all .15s; }
+.btn-orange { background:var(--orange); color:#fff; }
+.btn-orange:hover { background:var(--ora2); }
+.btn-ghost { background:transparent; color:var(--t2); border:1px solid var(--bord2); }
+.btn-ghost:hover { color:var(--text); border-color:var(--t3); }
+.btn-ghost.active { border-color:var(--orange); color:var(--orange); }
+.btn-red { background:#3f0000; color:var(--red); border:1px solid #7f0000; }
+.btn-red:hover { background:#5f0000; }
+.btn-sm { padding:4px 10px; font-size:11px; }
+
+/* MAIN TABLE — scrollable container, sticky thead relative to container */
+.main-table-wrap { border:1px solid var(--border); border-radius:var(--r); overflow-x:auto; overflow-y:auto; max-height:520px; }
+#boostTable { width:100%; border-collapse:collapse; min-width:920px; }
+#boostTable thead th { position:sticky; top:0; z-index:10; background:var(--bg3); padding:9px 12px; text-align:left; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.7px; color:var(--t2); white-space:nowrap; border-bottom:1px solid var(--border); }
+#boostTable th.num, #boostTable td.num { text-align:right; }
+#boostTable td { padding:10px 12px; border-bottom:1px solid var(--border); vertical-align:middle; }
+#boostTable tbody tr { background:var(--bg2); }
+#boostTable tbody tr:hover { background:var(--bg3); }
+#boostTable tbody tr.is-tip { background:rgba(255,85,0,.05); }
+#boostTable tbody tr.is-tip:hover { background:rgba(255,85,0,.09); }
+#boostTable tbody tr:last-child td { border-bottom:none; }
+#boostTable tfoot td { background:var(--bg3); font-weight:700; border-top:2px solid var(--bord2); padding:10px 12px; }
+
+/* sortable header */
+#boostTable th.sortable { cursor:pointer; user-select:none; }
+#boostTable th.sortable:hover { color:var(--text); }
+#boostTable th.sort-asc::after  { content:' ▲'; color:var(--orange); }
+#boostTable th.sort-desc::after { content:' ▼'; color:var(--orange); }
+
+/* INNER TABLE (history boost detail) — no sticky */
+.inner-table-wrap { border:1px solid var(--border); border-radius:var(--r); overflow:hidden; overflow-x:auto; }
+.inner-table { width:100%; border-collapse:collapse; min-width:560px; }
+.inner-table th { background:var(--bg3); padding:8px 12px; text-align:left; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.6px; color:var(--t2); border-bottom:1px solid var(--border); }
+.inner-table th.num,.inner-table td.num { text-align:right; }
+.inner-table td { padding:8px 12px; border-bottom:1px solid var(--border); vertical-align:middle; font-size:12px; }
+.inner-table tbody tr { background:var(--bg2); }
+.inner-table tbody tr:hover { background:var(--bg3); }
+.inner-table tbody tr:last-child td { border-bottom:none; }
+
+/* EVENT CELL */
+.evt-cell .evt { font-size:11px; color:var(--t2); margin-bottom:2px; }
+.evt-cell .mkt { font-size:13px; color:var(--text); line-height:1.4; }
+.boost-tag { display:inline-block; font-size:9px; font-weight:800; padding:1px 6px; border-radius:3px; margin-left:5px; letter-spacing:.5px; vertical-align:middle; text-transform:uppercase; }
+.tag-golden  { background:rgba(245,158,11,.15); color:var(--yellow); }
+.tag-boosted { background:rgba(255,85,0,.15);  color:var(--ora2); }
+.tag-other   { background:rgba(255,255,255,.07); color:var(--t2); }
+
+/* NUM VALUES */
+.num-val { font-variant-numeric:tabular-nums; }
+.green { color:var(--green); }
+.red   { color:var(--red); }
+.bold  { font-weight:700; }
+
+/* ROI badge */
+.roi { font-size:10px; font-weight:700; padding:1px 5px; border-radius:3px; margin-left:4px; }
+.roi-pos { background:rgba(34,197,94,.12); color:var(--green); }
+.roi-neg { background:rgba(239,68,68,.12); color:var(--red); }
+
+/* TIPSTER PILL */
+.tipster-toggle { display:flex; align-items:center; justify-content:center; }
+.t-pill { display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:20px; border:1px solid var(--bord2); background:transparent; color:var(--t3); cursor:pointer; font-size:11px; font-weight:700; transition:all .15s; white-space:nowrap; }
+.t-pill:hover { border-color:var(--orange); color:var(--t2); }
+.t-pill.on { background:rgba(255,85,0,.15); border-color:var(--orange); color:var(--orange); }
+.t-pill .dot { width:6px; height:6px; border-radius:50%; background:currentColor; flex-shrink:0; }
+
+/* SAVE BAR */
+.save-bar { display:flex; align-items:center; gap:12px; margin-top:14px; padding:12px 16px; background:var(--bg2); border:1px solid var(--border); border-radius:var(--r); flex-wrap:wrap; }
+.save-bar .summary { color:var(--t2); font-size:12px; }
+.save-bar .summary strong { color:var(--text); }
+
+/* ═══ HISTORY ═══════════════════════════════════════════════════════ */
+.hist-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; flex-wrap:wrap; gap:10px; }
+.hist-top h2 { font-size:15px; font-weight:700; }
+
+/* Summary meta strip */
+.hist-meta { display:flex; gap:20px; margin-bottom:16px; align-items:center; }
+.hist-meta .m-item { font-size:12px; color:var(--t2); }
+.hist-meta .m-item strong { color:var(--text); }
+
+/* Summary 3 panels */
+.summary-panels { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:20px; }
+.sum-panel { background:var(--bg2); border:1px solid var(--border); border-radius:8px; overflow:hidden; }
+.sum-panel.panel-total   { border-color:var(--border); }
+.sum-panel.panel-sport   { border-color:rgba(34,197,94,.3); }
+.sum-panel.panel-tipster { border-color:rgba(255,85,0,.35); }
+.sum-panel-head { padding:12px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:8px; }
+.sum-panel-head .ph-title { font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.7px; }
+.panel-total   .ph-title { color:var(--text); }
+.panel-sport   .ph-title { color:var(--green); }
+.panel-tipster .ph-title { color:var(--orange); }
+.sum-panel-head .ph-dot { width:7px; height:7px; border-radius:50%; background:currentColor; flex-shrink:0; }
+.sum-panel-body { display:grid; grid-template-columns:1fr 1fr; }
+.sum-stat { padding:14px 16px; border-right:1px solid var(--border); border-bottom:1px solid var(--border); }
+.sum-stat:nth-child(2n) { border-right:none; }
+.sum-stat:nth-last-child(-n+2) { border-bottom:none; }
+.sum-stat .ss-lbl { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--t2); margin-bottom:5px; }
+.sum-stat .ss-val { font-size:18px; font-weight:800; }
+.sum-stat .ss-val.big { font-size:20px; }
+@media(max-width:900px){ .summary-panels { grid-template-columns:1fr; } }
+
+/* Day pills */
+.day-pills { display:flex; gap:6px; margin-bottom:16px; flex-wrap:wrap; }
+.day-pill { padding:4px 12px; border-radius:20px; border:1px solid var(--bord2); background:var(--bg2); color:var(--t2); cursor:pointer; font-size:11px; font-weight:600; transition:all .15s; }
+.day-pill:hover { border-color:var(--orange); color:var(--text); }
+.day-pill.active { background:var(--orange); border-color:var(--orange); color:#fff; }
+
+/* Day card */
+.day-card { background:var(--bg2); border:1px solid var(--border); border-radius:8px; margin-bottom:12px; overflow:hidden; }
+.day-head { display:flex; align-items:center; justify-content:space-between; padding:14px 18px; cursor:pointer; user-select:none; transition:background .15s; }
+.day-head:hover { background:var(--bg3); }
+.dh-l { display:flex; align-items:center; gap:12px; }
+.dh-date { font-size:14px; font-weight:700; }
+.dh-chips { display:flex; gap:5px; flex-wrap:wrap; }
+.chip { padding:2px 8px; border-radius:3px; font-size:10px; font-weight:700; letter-spacing:.4px; }
+.chip-orange { background:rgba(255,85,0,.15); color:var(--orange); }
+.chip-gray   { background:var(--bg4); color:var(--t2); }
+.chip-green  { background:rgba(34,197,94,.12); color:var(--green); }
+.dh-r { display:flex; align-items:center; gap:12px; }
+.dh-net { font-size:14px; font-weight:800; }
+.chevron { color:var(--t3); font-size:12px; transition:transform .2s; display:inline-block; }
+.chevron.open { transform:rotate(180deg); }
+
+.day-body { display:none; border-top:1px solid var(--border); }
+.day-body.open { display:block; }
+
+/* TOTAL row inside day */
+.day-total-row { display:grid; grid-template-columns:repeat(6,1fr); gap:0; border-bottom:1px solid var(--border); background:var(--bg3); }
+.day-total-cell { padding:12px 16px; border-right:1px solid var(--border); }
+.day-total-cell:last-child { border-right:none; }
+.dtc-lbl { font-size:10px; color:var(--t2); text-transform:uppercase; letter-spacing:.5px; margin-bottom:4px; }
+.dtc-val { font-size:15px; font-weight:800; }
+
+/* Compare panels */
+.compare-row { display:grid; grid-template-columns:1fr 1fr; border-bottom:1px solid var(--border); }
+.compare-panel { padding:16px 20px; }
+.compare-panel:first-child { border-right:1px solid var(--border); }
+.cp-title { font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.7px; margin-bottom:12px; display:flex; align-items:center; gap:6px; }
+.cp-title.green  { color:var(--green); }
+.cp-title.orange { color:var(--orange); }
+.cp-dot { width:7px; height:7px; border-radius:50%; background:currentColor; }
+.cp-empty { color:var(--t3); font-size:12px; font-style:italic; }
+.cp-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px 24px; }
+.cp-s-lbl { font-size:10px; color:var(--t2); margin-bottom:2px; }
+.cp-s-val { font-size:14px; font-weight:700; }
+
+/* Boost list in history */
+.boost-list { padding:16px 18px 18px; }
+.boost-list-title { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.6px; color:var(--t2); margin-bottom:10px; }
+
+/* EMPTY */
+.empty { text-align:center; padding:64px 20px; }
+.e-icon { font-size:40px; margin-bottom:14px; opacity:.5; }
+.empty h3 { font-size:15px; font-weight:700; color:var(--t3); margin-bottom:6px; }
+.empty p { font-size:12px; color:var(--t2); }
+
+/* TOAST */
+.toast { position:fixed; bottom:24px; right:24px; background:var(--bg3); border:1px solid var(--bord2); border-radius:var(--r); padding:11px 18px; font-size:13px; font-weight:600; box-shadow:0 8px 32px rgba(0,0,0,.6); transform:translateY(20px); opacity:0; transition:all .2s; z-index:999; max-width:300px; }
+.toast.show { transform:translateY(0); opacity:1; }
+.toast.ok  { border-color:var(--green); color:var(--green); }
+.toast.err { border-color:var(--red);   color:var(--red); }
+
+@media(max-width:700px){
+  .compare-row { grid-template-columns:1fr; }
+  .compare-panel:first-child { border-right:none; border-bottom:1px solid var(--border); }
+  .day-total-row { grid-template-columns:repeat(3,1fr); }
+  .cards { grid-template-columns:repeat(2,1fr); }
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="logo">
+    <span class="arr">▶</span>
+    <span class="brand">ESPORTIVA<span>BET</span></span>
+    <span style="color:var(--t3);font-weight:400;font-size:12px;margin-left:4px">/ Boosts</span>
+  </div>
+  <div class="nav-tabs">
+    <div class="nav-tab active" id="tab-import"  onclick="switchTab('import')">Importar</div>
+    <div class="nav-tab"        id="tab-history" onclick="switchTab('history')">Histórico</div>
+  </div>
+</div>
+
+<!-- IMPORT PAGE -->
+<div class="page active" id="page-import">
+  <div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()">
+    <div class="dz-icon">📂</div>
+    <h3>Arraste o arquivo de export aqui</h3>
+    <p>Clique para selecionar &nbsp;·&nbsp; Aceita .xlsx</p>
+  </div>
+  <input type="file" id="fileInput" accept=".xlsx,.xls">
+
+  <div id="import-result">
+    <div class="info-strip">
+      <div class="date-field">
+        <label>Data</label>
+        <input type="text" class="date-input" id="dayDate" placeholder="DD/MM/AAAA">
+      </div>
+      <div class="info-cell"><div class="lbl">Boosts únicos</div><div class="val orange" id="cBoosts">—</div></div>
+      <div class="info-cell"><div class="lbl">Apostas</div><div class="val" id="cBets">—</div></div>
+      <div class="info-cell"><div class="lbl">Usuários</div><div class="val" id="cUsers">—</div></div>
+      <div class="info-cell"><div class="lbl">Stake Total</div><div class="val" id="vStake">—</div></div>
+      <div class="info-cell"><div class="lbl">Win Total</div><div class="val" id="vWin">—</div></div>
+      <div class="info-cell"><div class="lbl">Net Total</div><div class="val" id="vNet">—</div></div>
+    </div>
+
+    <div class="toolbar">
+      <div class="search-wrap">
+        <input type="text" class="search" id="searchInput" placeholder="Filtrar evento ou boost..." oninput="renderTable()">
+      </div>
+      <button class="btn btn-ghost" id="btnTipOnly" onclick="toggleOnlyTipster()">Só Tipster</button>
+      <button class="btn btn-ghost" onclick="markAll(true)">Marcar todos como Tipster</button>
+      <button class="btn btn-ghost" onclick="markAll(false)">Marcar todos como Sportsbook</button>
+      <button class="btn btn-ghost" style="margin-left:auto" onclick="clearImport()">↩ Novo arquivo</button>
+    </div>
+
+    <div class="main-table-wrap">
+      <table id="boostTable">
+        <thead>
+          <tr>
+            <th style="width:30px">#</th>
+            <th class="sortable" data-col="event" onclick="sortBy('event')">Evento · Boost</th>
+            <th class="num sortable" data-col="total"      onclick="sortBy('total')">Apostas</th>
+            <th class="num sortable" data-col="userCount"  onclick="sortBy('userCount')">Usuários</th>
+            <th class="num sortable" data-col="stake"      onclick="sortBy('stake')">Stake</th>
+            <th class="num sortable" data-col="win"        onclick="sortBy('win')">Win</th>
+            <th class="num sortable" data-col="bonusStake" onclick="sortBy('bonusStake')">Bonus Stake</th>
+            <th class="num sortable" data-col="bonusWin"   onclick="sortBy('bonusWin')">Bonus Win</th>
+            <th class="num sortable" data-col="net"        onclick="sortBy('net')">Net</th>
+            <th class="num sortable" data-col="roi"        onclick="sortBy('roi')">ROI</th>
+            <th style="text-align:center;width:90px">Tipster</th>
+          </tr>
+        </thead>
+        <tbody id="boostBody"></tbody>
+        <tfoot id="boostFoot"></tfoot>
+      </table>
+    </div>
+
+    <div class="save-bar">
+      <button class="btn btn-orange" onclick="saveDay()">💾 Salvar Dia</button>
+      <span class="summary" id="saveSummary"></span>
+      <div style="margin-left:auto;display:flex;gap:8px">
+        <button class="btn btn-ghost btn-sm" onclick="exportCurrentDay()">⬇ Exportar dia</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- HISTORY PAGE -->
+<div class="page" id="page-history">
+  <div class="hist-top">
+    <h2>Histórico de Boosts</h2>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-ghost" onclick="exportHistory()">⬇ Exportar Excel</button>
+      <button class="btn btn-red"   onclick="clearHistory()">🗑 Limpar tudo</button>
+    </div>
+  </div>
+  <div class="hist-meta"     id="histMeta"></div>
+  <div class="summary-panels" id="histCards"></div>
+  <div class="day-pills"      id="dayPills"></div>
+  <div id="histContent"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let parsedBoosts = [];
+let onlyTipster  = false;
+let sortCol      = 'stake';
+let sortDir      = -1;          // -1 = desc, 1 = asc
+const SK = 'esportiva_boosts_v3';
+
+// Preencha com as credenciais públicas do projeto no Supabase.
+const SUPABASE_URL = 'https://lfuhmhubafgjqzuueyzw.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_vZ4YlAWmHsF5yeDrW3o4Hg_KmaEmfm8';
+const supabaseClient = SUPABASE_URL.includes('SEU-PROJETO') || SUPABASE_ANON_KEY === 'SUA-CHAVE-ANON'
+  ? null
+  : window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ── TABS ──────────────────────────────────────────────────────────────────────
+function switchTab(t) {
+  ['import','history'].forEach(id => {
+    document.getElementById('page-'+id).classList.toggle('active', id===t);
+    document.getElementById('tab-'+id).classList.toggle('active', id===t);
+  });
+  if (t==='history') renderHistory();
+}
+
+// ── FILE ──────────────────────────────────────────────────────────────────────
+const dz = document.getElementById('dropzone');
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('drag'));
+dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('drag'); const f=e.dataTransfer.files[0]; if(f) processFile(f); });
+document.getElementById('fileInput').addEventListener('change', e => { if(e.target.files[0]) processFile(e.target.files[0]); });
+
+function processFile(file) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const wb = XLSX.read(e.target.result, { type:'array', cellDates:false });
+      const wsName = wb.SheetNames.includes('Report 1') ? 'Report 1' : wb.SheetNames[0];
+      const rows = XLSX.utils.sheet_to_json(wb.Sheets[wsName], { header:1, raw:true });
+      parseBoosts(rows);
+    } catch(err) { toast('Erro: '+err.message,'err'); }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function parseBoosts(rows) {
+  if (rows.length < 2) { toast('Arquivo vazio','err'); return; }
+  const H = rows[0];
+  const ci = n => H.findIndex(h => h && h.toString().toLowerCase().includes(n.toLowerCase()));
+  const C = {
+    player:     ci('Player Id'),
+    betDate:    ci('Bet date'),
+    event:      ci('Event name'),
+    market:     ci('Market types'),
+    stake:      ci('Stake'),
+    win:        ci('Winnings'),
+    bonusStake: ci('Bonus stake'),
+    bonusWin:   ci('Bonus winnings'),
+    status:     ci('Status'),
+  };
+
+  const missing = Object.entries(C).filter(([, index]) => index < 0).map(([name]) => name);
+  if (missing.length) { toast('Colunas ausentes: '+missing.join(', '),'err'); return; }
+
+  const boostRows = rows.slice(1).filter(r => {
+    const m = (r[C.market]||'').toString();
+    const status = (r[C.status]||'').toString().trim();
+    return (m.includes('Boost') || m.includes('boost')) && status !== 'VoidCashout';
+  });
+  if (!boostRows.length) { toast('Nenhum boost encontrado','err'); return; }
+
+  // Most-common bet date
+  const dc={};
+  boostRows.forEach(r => { const d=(r[C.betDate]||'').toString().substring(0,10); if(d) dc[d]=(dc[d]||0)+1; });
+  document.getElementById('dayDate').value = Object.entries(dc).sort((a,b)=>b[1]-a[1])[0]?.[0] || '';
+
+  // Group
+  const groups={};
+  const allUsers=new Set();
+  boostRows.forEach(r => {
+    const event  = (r[C.event] ||'').toString().trim();
+    const market = (r[C.market]||'').toString().trim();
+    const key    = event+'|||'+market;
+    const player = (r[C.player]||'').toString();
+    const stake  = +r[C.stake]      ||0;
+    const win    = +r[C.win]        ||0;
+    const bStake = +r[C.bonusStake] ||0;
+    const bWin   = +r[C.bonusWin]   ||0;
+    allUsers.add(player);
+    if (!groups[key]) groups[key]={event,market,total:0,users:new Set(),stake:0,win:0,bonusStake:0,bonusWin:0,tipster:false};
+    const g=groups[key];
+    g.total++; g.users.add(player);
+    g.stake+=stake; g.win+=win; g.bonusStake+=bStake; g.bonusWin+=bWin;
+  });
+
+  parsedBoosts = Object.values(groups).map(g => {
+    const net = g.stake - g.win;
+    const roi = g.stake ? net/g.stake : 0;
+    return { event:g.event, market:g.market, tipster:false, total:g.total, userCount:g.users.size, stake:g.stake, win:g.win, bonusStake:g.bonusStake, bonusWin:g.bonusWin, net, roi };
+  });
+
+  const totStake = parsedBoosts.reduce((s,b)=>s+b.stake,0);
+  const totWin   = parsedBoosts.reduce((s,b)=>s+b.win,  0);
+  const totNet   = totStake - totWin;
+
+  document.getElementById('cBoosts').textContent = parsedBoosts.length;
+  document.getElementById('cBets').textContent   = boostRows.length.toLocaleString('pt-BR');
+  document.getElementById('cUsers').textContent  = allUsers.size.toLocaleString('pt-BR');
+  document.getElementById('vStake').textContent  = 'R$'+fmt(totStake);
+  document.getElementById('vWin').textContent    = 'R$'+fmt(totWin);
+  const el = document.getElementById('vNet');
+  el.textContent = (totNet>=0?'+':'')+'R$'+fmt(totNet);
+  el.className   = 'val '+(totNet>=0?'green':'red');
+
+  dz.style.display = 'none';
+  document.getElementById('import-result').style.display = 'block';
+  sortCol='stake'; sortDir=-1;
+  renderTable();
+  updateSummary();
+}
+
+// ── SORT ──────────────────────────────────────────────────────────────────────
+function sortBy(col) {
+  if (sortCol===col) { sortDir*=-1; } else { sortCol=col; sortDir=-1; }
+  document.querySelectorAll('#boostTable th.sortable').forEach(th => {
+    th.classList.remove('sort-asc','sort-desc');
+    if (th.dataset.col===col) th.classList.add(sortDir===-1?'sort-desc':'sort-asc');
+  });
+  renderTable();
+}
+
+// ── TABLE ─────────────────────────────────────────────────────────────────────
+function renderTable() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  let visible = parsedBoosts.filter(b => {
+    if (onlyTipster && !b.tipster) return false;
+    if (q) return b.event.toLowerCase().includes(q) || b.market.toLowerCase().includes(q);
+    return true;
+  });
+
+  // Sort
+  visible.sort((a,b) => {
+    let av = a[sortCol], bv = b[sortCol];
+    if (typeof av==='string') av=av.toLowerCase(), bv=bv.toLowerCase();
+    return av < bv ? sortDir : av > bv ? -sortDir : 0;
+  });
+
+  const tbody = document.getElementById('boostBody');
+  const tfoot = document.getElementById('boostFoot');
+
+  tbody.innerHTML = visible.map((b,i) => {
+    const idx = parsedBoosts.indexOf(b);
+    const tag = boostTag(b.market);
+    const nc  = b.net>=0 ? 'green bold' : 'red bold';
+    const roiPct = (b.roi*100).toFixed(1);
+    const roiTag = `<span class="roi ${b.roi>=0?'roi-pos':'roi-neg'}">${b.roi>=0?'+':''}${roiPct}%</span>`;
+    return `<tr class="${b.tipster?'is-tip':''}" data-idx="${idx}">
+      <td style="color:var(--t3);font-size:11px">${i+1}</td>
+      <td class="evt-cell">
+        <div class="evt">${esc(b.event)}</div>
+        <div class="mkt">${esc(cleanMkt(b.market))}${tag}</div>
+      </td>
+      <td class="num num-val">${b.total.toLocaleString('pt-BR')}</td>
+      <td class="num num-val">${b.userCount.toLocaleString('pt-BR')}</td>
+      <td class="num num-val">R$${fmt(b.stake)}</td>
+      <td class="num num-val">R$${fmt(b.win)}</td>
+      <td class="num num-val">R$${fmt(b.bonusStake)}</td>
+      <td class="num num-val">R$${fmt(b.bonusWin)}</td>
+      <td class="num num-val ${nc}">${(b.net>=0?'+':'')+'R$'+fmt(b.net)}</td>
+      <td class="num">${roiTag}</td>
+      <td class="tipster-toggle">
+        <button class="t-pill ${b.tipster?'on':''}" onclick="toggleTipster(${idx})">
+          <span class="dot"></span>${b.tipster?'Tipster':'Sportsbook'}
+        </button>
+      </td>
+    </tr>`;
+  }).join('');
+
+  // Totals
+  if (visible.length) {
+    const tot = visible.reduce((a,b)=>({
+      total:a.total+b.total, stake:a.stake+b.stake, win:a.win+b.win,
+      bonusStake:a.bonusStake+b.bonusStake, bonusWin:a.bonusWin+b.bonusWin, net:a.net+b.net,
+    }),{total:0,stake:0,win:0,bonusStake:0,bonusWin:0,net:0});
+    const nc = tot.net>=0?'green':'red';
+    const roiTot = tot.stake ? tot.net/tot.stake : 0;
+    const rTag = `<span class="roi ${roiTot>=0?'roi-pos':'roi-neg'}">${roiTot>=0?'+':''}${(roiTot*100).toFixed(1)}%</span>`;
+    tfoot.innerHTML=`<tr>
+      <td></td>
+      <td><strong>TOTAL — ${visible.length} boost${visible.length!==1?'s':''}</strong></td>
+      <td class="num"><strong>${tot.total.toLocaleString('pt-BR')}</strong></td>
+      <td class="num">—</td>
+      <td class="num"><strong>R$${fmt(tot.stake)}</strong></td>
+      <td class="num"><strong>R$${fmt(tot.win)}</strong></td>
+      <td class="num"><strong>R$${fmt(tot.bonusStake)}</strong></td>
+      <td class="num"><strong>R$${fmt(tot.bonusWin)}</strong></td>
+      <td class="num ${nc} bold">${(tot.net>=0?'+':'')+'R$'+fmt(tot.net)}</td>
+      <td class="num">${rTag}</td>
+      <td></td>
+    </tr>`;
+  } else { tfoot.innerHTML=''; }
+}
+
+function toggleTipster(idx) {
+  parsedBoosts[idx].tipster = !parsedBoosts[idx].tipster;
+  renderTable(); updateSummary();
+}
+function markAll(v) { parsedBoosts.forEach(b=>b.tipster=v); renderTable(); updateSummary(); }
+function toggleOnlyTipster() {
+  onlyTipster=!onlyTipster;
+  document.getElementById('btnTipOnly').classList.toggle('active',onlyTipster);
+  renderTable();
+}
+function updateSummary() {
+  const t = parsedBoosts.filter(b=>b.tipster).length;
+  document.getElementById('saveSummary').innerHTML =
+    `<strong>${parsedBoosts.length-t}</strong> sportsbook &nbsp;·&nbsp; <strong style="color:var(--orange)">${t}</strong> tipster`;
+}
+function clearImport() {
+  parsedBoosts=[]; onlyTipster=false; sortCol='stake'; sortDir=-1;
+  document.getElementById('import-result').style.display='none';
+  dz.style.display='';
+  document.getElementById('fileInput').value='';
+  document.getElementById('searchInput').value='';
+  document.getElementById('btnTipOnly').classList.remove('active');
+}
+
+// ── SAVE ──────────────────────────────────────────────────────────────────────
+async function saveDay() {
+  const date = document.getElementById('dayDate').value.trim();
+  if (!date) { toast('Informe a data','err'); return; }
+  if (!parsedBoosts.length) { toast('Nenhum dado','err'); return; }
+  const days = await loadDays();
+  const ei = days.findIndex(d=>d.date===date);
+  const entry = { date, savedAt:Date.now(), boosts:parsedBoosts.map(b=>({...b})) };
+  if (ei>=0) {
+    if (!confirm(`Substituir registro de ${date}?`)) return;
+    days[ei]=entry;
+  } else { days.push(entry); }
+  days.sort((a,b)=>b.date.localeCompare(a.date));
+  try {
+    await saveDays(days);
+  } catch (err) {
+    toast(err.message,'err');
+    return;
+  }
+  toast('✅ '+date+' salvo!','ok');
+}
+
+function exportCurrentDay() {
+  if (!parsedBoosts.length) { toast('Nenhum dado','err'); return; }
+  doExport(document.getElementById('dayDate').value||'sem-data', parsedBoosts);
+}
+
+// ── HISTORY ───────────────────────────────────────────────────────────────────
+async function renderHistory() {
+  const days = await loadDays();
+  const cards   = document.getElementById('histCards');
+  const pills   = document.getElementById('dayPills');
+  const content = document.getElementById('histContent');
+
+  if (!days.length) {
+    cards.innerHTML=pills.innerHTML='';
+    content.innerHTML='<div class="empty"><div class="e-icon">📭</div><h3>Nenhum dia salvo</h3><p>Importe um export e salve o dia.</p></div>';
+    return;
+  }
+
+  const all = days.flatMap(d=>d.boosts);
+  const tip = all.filter(b=>b.tipster);
+  const ger = all.filter(b=>!b.tipster);
+  const agg = arr => ({
+    boosts:  arr.length,
+    apostas: arr.reduce((s,b)=>s+(b.total||0),0),
+    stake:   arr.reduce((s,b)=>s+b.stake,0),
+    win:     arr.reduce((s,b)=>s+b.win,0),
+    net:     arr.reduce((s,b)=>s+b.net,0),
+  });
+  const aAll=agg(all), aTip=agg(tip), aGer=agg(ger);
+
+  // Meta strip
+  document.getElementById('histMeta').innerHTML =
+    `<div class="m-item">📅 <strong>${days.length}</strong> dias registrados</div>`+
+    `<div class="m-item">💰 Stake total: <strong>R$${fmt(aAll.stake)}</strong></div>`;
+
+  const mkPanel = (type, label, a) => {
+    const nc = a.net>=0?'green':'red';
+    return `<div class="sum-panel panel-${type}">
+      <div class="sum-panel-head">
+        <span class="ph-dot"></span>
+        <span class="ph-title">${label}</span>
+      </div>
+      <div class="sum-panel-body">
+        <div class="sum-stat"><div class="ss-lbl">Boosts</div><div class="ss-val">${a.boosts.toLocaleString('pt-BR')}</div></div>
+        <div class="sum-stat"><div class="ss-lbl">Apostas</div><div class="ss-val">${a.apostas.toLocaleString('pt-BR')}</div></div>
+        <div class="sum-stat"><div class="ss-lbl">Stake</div><div class="ss-val">R$${fmt(a.stake)}</div></div>
+        <div class="sum-stat"><div class="ss-lbl">Net</div><div class="ss-val big ${nc}">${(a.net>=0?'+':'')+'R$'+fmt(a.net)}</div></div>
+      </div>
+    </div>`;
+  };
+
+  cards.innerHTML =
+    mkPanel('total',   'Total Geral (Sportsbook + Tipster)', aAll)+
+    mkPanel('sport',   '⚡ Sportsbook', aGer)+
+    mkPanel('tipster', '🎯 Tipster', aTip);
+
+  pills.innerHTML =
+    `<span class="day-pill active" onclick="filterDays('all',this)">Todos</span>`+
+    days.map(d=>`<span class="day-pill" onclick="filterDays('${d.date}',this)">${d.date}</span>`).join('');
+
+  content.innerHTML = days.map(d=>renderDayCard(d)).join('');
+}
+
+function renderDayCard(day) {
+  const geral   = day.boosts.filter(b=>!b.tipster);   // sportsbook
+  const tipster = day.boosts.filter(b=>b.tipster);
+  const agg = arr => arr.reduce((a,b)=>({total:a.total+b.total,userCount:a.userCount+(b.userCount||0),stake:a.stake+b.stake,win:a.win+b.win,bonusStake:a.bonusStake+b.bonusStake,bonusWin:a.bonusWin+b.bonusWin,net:a.net+b.net}),{total:0,userCount:0,stake:0,win:0,bonusStake:0,bonusWin:0,net:0});
+  const gA  = agg(geral);
+  const tA  = agg(tipster);
+  const all = agg(day.boosts);
+  const dayNet = all.net;
+  const nc  = dayNet>=0?'green':'red';
+  const roi = all.stake ? all.net/all.stake : 0;
+
+  const cpPanel = (a, arr, type) => {
+    const isEmpty = arr.length===0;
+    const isGer = type==='sportsbook';
+    const colorCls = isGer ? 'green' : 'orange';
+    const roiV = a.stake ? a.net/a.stake : 0;
+    const stats = isEmpty
+      ? `<div class="cp-empty">Nenhum boost ${type} neste dia.</div>`
+      : `<div class="cp-grid">
+          <div><div class="cp-s-lbl">Boosts</div><div class="cp-s-val">${arr.length}</div></div>
+          <div><div class="cp-s-lbl">Apostas</div><div class="cp-s-val">${a.total.toLocaleString('pt-BR')}</div></div>
+          <div><div class="cp-s-lbl">Stake</div><div class="cp-s-val">R$${fmt(a.stake)}</div></div>
+          <div><div class="cp-s-lbl">Win</div><div class="cp-s-val">R$${fmt(a.win)}</div></div>
+          <div><div class="cp-s-lbl">Bonus Stake</div><div class="cp-s-val">R$${fmt(a.bonusStake)}</div></div>
+          <div><div class="cp-s-lbl">Bonus Win</div><div class="cp-s-val">R$${fmt(a.bonusWin)}</div></div>
+          <div style="grid-column:1/-1"><div class="cp-s-lbl">Net</div><div class="cp-s-val ${a.net>=0?'green':'red'} bold">${(a.net>=0?'+':'')+'R$'+fmt(a.net)}</div></div>
+          <div style="grid-column:1/-1"><div class="cp-s-lbl">ROI</div><div class="cp-s-val ${roiV>=0?'green':'red'}">${(roiV>=0?'+':'')+(roiV*100).toFixed(1)}%</div></div>
+        </div>`;
+    return `<div class="compare-panel">
+      <div class="cp-title ${colorCls}"><span class="cp-dot"></span>${isGer?'⚡ Sportsbook':'🎯 Tipster'}</div>
+      ${stats}
+    </div>`;
+  };
+
+  const boostDetail = day.boosts.map(b=>{
+    const tag = boostTag(b.market);
+    const nc2 = b.net>=0?'green':'red';
+    const roi2 = b.stake ? b.net/b.stake : 0;
+    return `<tr>
+      <td style="font-size:11px;font-weight:800;color:${b.tipster?'var(--orange)':'var(--t2)'}">${b.tipster?'TIP':'SPB'}</td>
+      <td style="color:var(--t2);font-size:11px">${esc(b.event)}</td>
+      <td>${esc(cleanMkt(b.market))}${tag}</td>
+      <td class="num">${b.total}</td>
+      <td class="num">R$${fmt(b.stake)}</td>
+      <td class="num">R$${fmt(b.win)}</td>
+      <td class="num ${nc2} bold">${(b.net>=0?'+':'')+'R$'+fmt(b.net)}</td>
+      <td class="num"><span class="roi ${roi2>=0?'roi-pos':'roi-neg'}">${(roi2>=0?'+':'')+(roi2*100).toFixed(1)}%</span></td>
+    </tr>`;
+  }).join('');
+
+  return `<div class="day-card" data-date="${day.date}">
+    <div class="day-head" onclick="toggleDay('${day.date}')">
+      <div class="dh-l">
+        <span class="dh-date">📅 ${day.date}</span>
+        <div class="dh-chips">
+          <span class="chip chip-gray">${day.boosts.length} boosts</span>
+          ${geral.length  ?`<span class="chip chip-green">⚡ ${geral.length} sportsbook</span>`:''}
+          ${tipster.length?`<span class="chip chip-orange">🎯 ${tipster.length} tipster</span>`:''}
+        </div>
+      </div>
+      <div class="dh-r">
+        <span class="dh-net ${nc}">Net ${(dayNet>=0?'+':'')+'R$'+fmt(dayNet)}</span>
+        <button class="btn btn-red btn-sm" onclick="event.stopPropagation();deleteDay('${day.date}')">Excluir</button>
+        <span class="chevron" id="chev-${day.date}">▾</span>
+      </div>
+    </div>
+    <div class="day-body" id="body-${day.date}">
+
+      <!-- TOTAL ROW (all combined) -->
+      <div class="day-total-row">
+        <div class="day-total-cell"><div class="dtc-lbl">Total Apostas</div><div class="dtc-val">${all.total.toLocaleString('pt-BR')}</div></div>
+        <div class="day-total-cell"><div class="dtc-lbl">Stake</div><div class="dtc-val">R$${fmt(all.stake)}</div></div>
+        <div class="day-total-cell"><div class="dtc-lbl">Win</div><div class="dtc-val">R$${fmt(all.win)}</div></div>
+        <div class="day-total-cell"><div class="dtc-lbl">Bonus Stake</div><div class="dtc-val">R$${fmt(all.bonusStake)}</div></div>
+        <div class="day-total-cell"><div class="dtc-lbl">Bonus Win</div><div class="dtc-val">R$${fmt(all.bonusWin)}</div></div>
+        <div class="day-total-cell">
+          <div class="dtc-lbl">Net Total &nbsp;<span class="roi ${roi>=0?'roi-pos':'roi-neg'}">${(roi>=0?'+':'')+(roi*100).toFixed(1)}%</span></div>
+          <div class="dtc-val ${nc}">${(dayNet>=0?'+':'')+'R$'+fmt(dayNet)}</div>
+        </div>
+      </div>
+
+      <!-- GERAL vs TIPSTER -->
+      <div class="compare-row">
+        ${cpPanel(gA, geral,   'sportsbook')}
+        ${cpPanel(tA, tipster, 'tipster')}
+      </div>
+
+      <!-- BOOST DETAIL -->
+      <div class="boost-list">
+        <div class="boost-list-title">Detalhe por boost</div>
+        <div class="inner-table-wrap">
+          <table class="inner-table">
+            <thead><tr>
+              <th style="width:40px">Tipo</th>
+              <th>Evento</th>
+              <th>Boost</th>
+              <th class="num">Apostas</th>
+              <th class="num">Stake</th>
+              <th class="num">Win</th>
+              <th class="num">Net</th>
+              <th class="num">ROI</th>
+            </tr></thead>
+            <tbody>${boostDetail}</tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function toggleDay(date) {
+  const body = document.getElementById('body-'+date);
+  const chev = document.getElementById('chev-'+date);
+  const open = body.classList.toggle('open');
+  if (chev) chev.classList.toggle('open', open);
+}
+
+function filterDays(filter, el) {
+  document.querySelectorAll('.day-pill').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.day-card').forEach(c=>{
+    c.style.display = filter==='all'||c.dataset.date===filter ? '' : 'none';
+  });
+}
+
+async function deleteDay(date) {
+  if (!confirm(`Excluir registro de ${date}?`)) return;
+  if (supabaseClient) {
+    const { error } = await supabaseClient.from('boost_days').delete().eq('date', date);
+    if (error) { toast('Erro ao excluir: '+error.message,'err'); return; }
+  } else {
+    saveDaysLocal(loadDaysLocal().filter(d=>d.date!==date));
+  }
+  await renderHistory();
+  toast('Excluído: '+date,'ok');
+}
+
+async function clearHistory() {
+  if (!confirm('Excluir TODO o histórico?')) return;
+  if (supabaseClient) {
+    const { error } = await supabaseClient.from('boost_days').delete().not('date', 'is', null);
+    if (error) { toast('Erro ao limpar: '+error.message,'err'); return; }
+  } else {
+    localStorage.removeItem(SK);
+  }
+  await renderHistory();
+  toast('Histórico limpo','ok');
+}
+
+// ── EXPORT ────────────────────────────────────────────────────────────────────
+function doExport(dateStr, boosts) {
+  const rows=[['Data','Tipo','Evento','Boost','Overall Total','Overall Users','Total Stake','Total Win','Bonus Stake','Bonus Winnings','Net','ROI%']];
+  boosts.forEach(b=>rows.push([dateStr,b.tipster?'Tipster':'Sportsbook',b.event,b.market,b.total,b.userCount||0,b.stake,b.win,b.bonusStake,b.bonusWin,b.net,+((b.roi||0)*100).toFixed(2)]));
+  const ws=XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols']=[12,10,35,55,14,14,14,14,14,14,14,10].map(w=>({wch:w}));
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Boosts');
+  XLSX.writeFile(wb,'boosts-'+dateStr.replace(/\//g,'-')+'.xlsx');
+  toast('✅ Exportado','ok');
+}
+
+async function exportHistory() {
+  const days=await loadDays();
+  if (!days.length) { toast('Nenhum dado','err'); return; }
+  const rows=[['Data','Tipo','Evento','Boost','Overall Total','Overall Users','Total Stake','Total Win','Bonus Stake','Bonus Winnings','Net','ROI%']];
+  days.forEach(d=>d.boosts.forEach(b=>rows.push([d.date,b.tipster?'Tipster':'Sportsbook',b.event,b.market,b.total,b.userCount||0,b.stake,b.win,b.bonusStake,b.bonusWin,b.net,+((b.roi||0)*100).toFixed(2)])));
+  const ws=XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols']=[12,10,35,55,14,14,14,14,14,14,14,10].map(w=>({wch:w}));
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Histórico');
+  XLSX.writeFile(wb,'boosts-historico.xlsx');
+  toast('✅ Excel exportado','ok');
+}
+
+// ── STORAGE ───────────────────────────────────────────────────────────────────
+function loadDaysLocal() { try { return JSON.parse(localStorage.getItem(SK)||'[]'); } catch { return []; } }
+function saveDaysLocal(d) { localStorage.setItem(SK,JSON.stringify(d)); }
+async function loadDays() {
+  if (!supabaseClient) return loadDaysLocal();
+  const { data, error } = await supabaseClient
+    .from('boost_days')
+    .select('date, saved_at, boosts')
+    .order('date', { ascending: false });
+  if (error) { toast('Erro ao carregar Supabase: '+error.message,'err'); return []; }
+  return data.map(row => ({ date: row.date, savedAt: new Date(row.saved_at).getTime(), boosts: row.boosts || [] }));
+}
+async function saveDays(days) {
+  if (!supabaseClient) { saveDaysLocal(days); return; }
+  const rows = days.map(day => ({ date: day.date, saved_at: new Date(day.savedAt || Date.now()).toISOString(), boosts: day.boosts }));
+  const { error } = await supabaseClient.from('boost_days').upsert(rows, { onConflict: 'date' });
+  if (error) throw new Error('Erro ao salvar no Supabase: '+error.message);
+}
+
+// ── UTILS ─────────────────────────────────────────────────────────────────────
+function fmt(n) { return (Math.round((+n||0)*100)/100).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function cleanMkt(m) {
+  const lines=m.split('\n').map(l=>l.trim()).filter(Boolean);
+  if (lines.length<=2) return lines.join(' · ');
+  return lines.slice(0,2).join(' · ')+` (+${lines.length-2})`;
+}
+function boostTag(m) {
+  if (m.includes('Golden Boost'))               return '<span class="boost-tag tag-golden">Golden</span>';
+  if (m.includes('Boosted Odds'))               return '<span class="boost-tag tag-boosted">Boosted</span>';
+  if (m.toLowerCase().includes('boost'))        return '<span class="boost-tag tag-other">Boost</span>';
+  return '';
+}
+function toast(msg,type='ok') {
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.className='toast show '+type;
+  clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('show'),3000);
+}
+</script>
+</body>
+</html>
