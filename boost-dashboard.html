@@ -233,6 +233,16 @@ body { background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui
 .toast.ok  { border-color:var(--green); color:var(--green); }
 .toast.err { border-color:var(--red);   color:var(--red); }
 
+/* MODAL */
+.modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,.7); display:flex; align-items:center; justify-content:center; padding:20px; z-index:1000; opacity:0; visibility:hidden; transition:all .2s; }
+.modal-backdrop.show { opacity:1; visibility:visible; }
+.modal { width:min(420px,100%); background:var(--bg2); border:1px solid var(--border); border-radius:10px; box-shadow:0 16px 50px rgba(0,0,0,.45); overflow:hidden; }
+.modal-header { padding:16px 18px 12px; border-bottom:1px solid var(--border); }
+.modal-title { font-size:15px; font-weight:700; }
+.modal-body { padding:14px 18px 18px; color:var(--t2); font-size:13px; line-height:1.5; }
+.modal-actions { display:flex; justify-content:flex-end; gap:8px; padding:0 18px 16px; }
+.modal-actions .btn { min-width:104px; justify-content:center; }
+
 @media(max-width:700px){
   .compare-row { grid-template-columns:1fr; }
   .compare-panel:first-child { border-right:none; border-bottom:1px solid var(--border); }
@@ -334,6 +344,21 @@ body { background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui
   <div class="summary-panels" id="histCards"></div>
   <div class="day-pills"      id="dayPills"></div>
   <div id="histContent"></div>
+</div>
+
+<div class="modal-backdrop" id="confirmModal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="confirmModalTitle">
+    <div class="modal-header">
+      <div class="modal-title" id="confirmModalTitle">Confirmar</div>
+    </div>
+    <div class="modal-body">
+      <p id="confirmModalMessage">Deseja continuar?</p>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" type="button" id="confirmModalCancel">Cancelar</button>
+      <button class="btn btn-orange" type="button" id="confirmModalOk">Confirmar</button>
+    </div>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -565,6 +590,72 @@ function clearImport() {
 }
 
 // ── SAVE ──────────────────────────────────────────────────────────────────────
+function openConfirmModal(title, message, confirmLabel='Confirmar', cancelLabel='Cancelar') {
+  return new Promise(resolve => {
+    const modal = document.getElementById('confirmModal');
+    const titleEl = document.getElementById('confirmModalTitle');
+    const msgEl = document.getElementById('confirmModalMessage');
+    const okBtn = document.getElementById('confirmModalOk');
+    const cancelBtn = document.getElementById('confirmModalCancel');
+
+    titleEl.textContent = title;
+    msgEl.textContent = message;
+    okBtn.textContent = confirmLabel;
+    cancelBtn.textContent = cancelLabel;
+
+    const close = (value) => {
+      modal.classList.remove('show');
+      okBtn.onclick = null;
+      cancelBtn.onclick = null;
+      modal.onclick = null;
+      resolve(value);
+    };
+
+    okBtn.onclick = () => close(true);
+    cancelBtn.onclick = () => close(false);
+    modal.onclick = (e) => { if (e.target.id === 'confirmModal') close(false); };
+    modal.classList.add('show');
+  });
+}
+
+function loadDayIntoEditor(day, showToast=true) {
+  if (!day || !Array.isArray(day.boosts)) return;
+
+  parsedBoosts = day.boosts.map(b => ({
+    ...b,
+    tipster: !!b.tipster,
+    total: Number(b.total) || 0,
+    userCount: Number(b.userCount) || 0,
+    stake: Number(b.stake) || 0,
+    win: Number(b.win) || 0,
+    bonusStake: Number(b.bonusStake) || 0,
+    bonusWin: Number(b.bonusWin) || 0,
+    net: Number(b.net) || 0,
+    roi: Number(b.roi) || 0,
+  }));
+
+  onlyTipster = false;
+  sortCol = 'stake';
+  sortDir = -1;
+  document.getElementById('dayDate').value = day.date || '';
+  document.getElementById('searchInput').value = '';
+  document.getElementById('btnTipOnly').classList.remove('active');
+  document.getElementById('dropzone').style.display = 'none';
+  document.getElementById('import-result').style.display = 'block';
+  document.getElementById('fileInput').value = '';
+
+  renderTable();
+  updateSummary();
+  switchTab('import');
+  if (showToast) toast(`Dia ${day.date} carregado para edição`, 'ok');
+}
+
+async function editDay(date) {
+  const days = await loadDays();
+  const day = days.find(d => d.date === date);
+  if (day) loadDayIntoEditor(day);
+}
+
 async function saveDay() {
   const date = document.getElementById('dayDate').value.trim();
   if (!date) { toast('Informe a data','err'); return; }
@@ -573,7 +664,8 @@ async function saveDay() {
   const ei = days.findIndex(d=>d.date===date);
   const entry = { date, savedAt:Date.now(), boosts:parsedBoosts.map(b=>({...b})) };
   if (ei>=0) {
-    if (!confirm(`Substituir registro de ${date}?`)) return;
+    const ok = await openConfirmModal('Substituir dia salvo', `Já existe um registro para ${date}. Deseja substituí-lo?`, 'Substituir', 'Cancelar');
+    if (!ok) return;
     days[ei]=entry;
   } else { days.push(entry); }
   days.sort((a,b)=>b.date.localeCompare(a.date));
@@ -711,7 +803,8 @@ function renderDayCard(day) {
       </div>
       <div class="dh-r">
         <span class="dh-net ${nc}">Net ${(dayNet>=0?'+':'')+'R$'+fmt(dayNet)}</span>
-        <button class="btn btn-red btn-sm" onclick="event.stopPropagation();deleteDay('${day.date}')">Excluir</button>
+        <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();editDay('${day.date.replace(/'/g, "\\'")}')">Editar</button>
+        <button class="btn btn-red btn-sm" onclick="event.stopPropagation();deleteDay('${day.date.replace(/'/g, "\\'")}')">Excluir</button>
         <span class="chevron" id="chev-${day.date}">▾</span>
       </div>
     </div>
