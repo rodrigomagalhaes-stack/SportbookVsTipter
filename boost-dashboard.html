@@ -27,10 +27,10 @@
   --blue:   #60a5fa;
   --r: 6px;
 }
-/* cores das três classificações */
+/* cores das três vertentes */
 .c-spb { color:var(--green); }
 .c-tip { color:var(--orange); }
-.c-wel { color:var(--purple); }
+.c-aum { color:var(--blue); }
 body { background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui,sans-serif; font-size:13px; min-height:100vh; }
 
 /* TOPBAR */
@@ -95,25 +95,26 @@ body { background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui
 .fs-btn.active { background:var(--bg4); color:var(--text); box-shadow:0 1px 3px rgba(0,0,0,.4); }
 .fs-btn[data-cat="sportsbook"].active { background:rgba(34,197,94,.18);  color:var(--green); }
 .fs-btn[data-cat="tipster"].active    { background:rgba(255,85,0,.18);   color:var(--orange); }
-.fs-btn[data-cat="welcome"].active    { background:rgba(168,85,247,.18); color:var(--purple); }
+.fs-btn[data-cat="aumento"].active    { background:rgba(96,165,250,.18); color:var(--blue); }
 .mark-all { display:inline-flex; align-items:center; gap:4px; font-size:11px; color:var(--t3); }
 
 /* SELETOR DE CLASSIFICAÇÃO NA LINHA */
 .cat-toggle { text-align:center; }
 .seg { display:inline-flex; gap:2px; background:var(--bg3); padding:2px; border-radius:5px; }
-.seg-btn { padding:4px 9px; border:none; background:transparent; color:var(--t3); border-radius:3px; cursor:pointer; font-size:10px; font-weight:800; letter-spacing:.4px; transition:all .12s; }
+.seg-btn { padding:4px 11px; border:none; background:transparent; color:var(--t3); border-radius:3px; cursor:pointer; font-size:10px; font-weight:800; letter-spacing:.4px; transition:all .12s; }
 .seg-btn:hover { color:var(--text); background:var(--bg4); }
 .seg-btn.spb.on { background:rgba(34,197,94,.2);  color:var(--green); }
 .seg-btn.tip.on { background:rgba(255,85,0,.2);   color:var(--orange); }
-.seg-btn.wel.on { background:rgba(168,85,247,.2); color:var(--purple); }
+/* linha da campanha: vertente vem do dado, não se escolhe */
+.cat-locked { display:inline-flex; align-items:center; gap:4px; padding:4px 10px; border-radius:20px; font-size:10px; font-weight:800; letter-spacing:.4px; background:rgba(96,165,250,.15); color:var(--blue); border:1px solid rgba(96,165,250,.35); white-space:nowrap; cursor:default; }
 
-/* faixa lateral colorida por classificação na linha da tabela */
+/* faixa lateral colorida por vertente na linha da tabela */
 #boostTable tbody tr.row-tip td:first-child { box-shadow:inset 3px 0 0 var(--orange); }
-#boostTable tbody tr.row-wel td:first-child { box-shadow:inset 3px 0 0 var(--purple); }
+#boostTable tbody tr.row-aum td:first-child { box-shadow:inset 3px 0 0 var(--blue); }
 #boostTable tbody tr.row-tip { background:rgba(255,85,0,.05); }
-#boostTable tbody tr.row-wel { background:rgba(168,85,247,.05); }
+#boostTable tbody tr.row-aum { background:rgba(96,165,250,.05); }
 #boostTable tbody tr.row-tip:hover { background:rgba(255,85,0,.09); }
-#boostTable tbody tr.row-wel:hover { background:rgba(168,85,247,.09); }
+#boostTable tbody tr.row-aum:hover { background:rgba(96,165,250,.09); }
 
 /* coluna de aumento de ganhos */
 .aum-n { font-weight:700; color:var(--blue); }
@@ -133,6 +134,7 @@ body { background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui
 .camp-stat.camp-cost { background:rgba(239,68,68,.05); }
 .cs-lbl { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--t2); margin-bottom:4px; }
 .cs-val { font-size:16px; font-weight:800; }
+.cs-sub { font-size:10px; color:var(--t3); margin-top:3px; }
 .camp-note { padding:9px 16px; border-top:1px solid rgba(96,165,250,.18); font-size:11px; color:var(--t2); line-height:1.5; }
 .camp-note strong { color:var(--blue); }
 @media(max-width:900px){ .camp-body { grid-template-columns:repeat(3,1fr); } }
@@ -219,8 +221,8 @@ body { background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui
 .sum-panel.panel-total   { border-color:var(--bord2); }
 .sum-panel.panel-sport   { border-color:rgba(34,197,94,.3); }
 .sum-panel.panel-tipster { border-color:rgba(255,85,0,.35); }
-.sum-panel.panel-welcome { border-color:rgba(168,85,247,.35); }
-.panel-welcome .ph-title { color:var(--purple); }
+.sum-panel.panel-aumento { border-color:rgba(96,165,250,.4); }
+.panel-aumento .ph-title { color:var(--blue); }
 .sum-panel-head { padding:12px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:8px; }
 .sum-panel-head .ph-title { font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.7px; }
 .panel-total   .ph-title { color:var(--text); }
@@ -256,7 +258,6 @@ body { background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui
 .chip-green  { background:rgba(34,197,94,.12); color:var(--green); }
 .chip-spb    { background:rgba(34,197,94,.12);  color:var(--green); }
 .chip-tip    { background:rgba(255,85,0,.15);   color:var(--orange); }
-.chip-wel    { background:rgba(168,85,247,.15); color:var(--purple); }
 .chip-aum    { background:rgba(96,165,250,.15); color:var(--blue); }
 .dh-r { display:flex; align-items:center; gap:12px; }
 .dh-net { font-size:14px; font-weight:800; }
@@ -280,7 +281,7 @@ body { background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui
 .cp-title { font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.7px; margin-bottom:12px; display:flex; align-items:center; gap:6px; }
 .cp-title.spb { color:var(--green); }
 .cp-title.tip { color:var(--orange); }
-.cp-title.wel { color:var(--purple); }
+.cp-title.aum { color:var(--blue); }
 .cp-dot { width:7px; height:7px; border-radius:50%; background:currentColor; }
 .cp-empty { color:var(--t3); font-size:12px; font-style:italic; }
 .cp-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px 24px; }
@@ -373,13 +374,12 @@ body { background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui
         <button class="fs-btn active" data-cat="all"        onclick="setCatFilter('all')">Todos</button>
         <button class="fs-btn"        data-cat="sportsbook" onclick="setCatFilter('sportsbook')">⚡ Sportsbook</button>
         <button class="fs-btn"        data-cat="tipster"    onclick="setCatFilter('tipster')">🎯 Tipster</button>
-        <button class="fs-btn"        data-cat="welcome"    onclick="setCatFilter('welcome')">👋 Welcome</button>
+        <button class="fs-btn"        data-cat="aumento"    onclick="setCatFilter('aumento')">🚀 Aumento</button>
       </div>
       <button class="btn btn-ghost" id="btnHideSingle" onclick="toggleHideSingleBB()">Ocultar BetBuilder únicos</button>
-      <span class="mark-all">Marcar todos:
+      <span class="mark-all">Marcar classificáveis:
         <button class="btn btn-ghost btn-sm" onclick="markAll('sportsbook')">SPB</button>
         <button class="btn btn-ghost btn-sm" onclick="markAll('tipster')">TIP</button>
-        <button class="btn btn-ghost btn-sm" onclick="markAll('welcome')">WEL</button>
       </span>
       <button class="btn btn-ghost" style="margin-left:auto" onclick="clearImport()">↩ Novo arquivo</button>
     </div>
@@ -455,25 +455,34 @@ body { background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui
 // ── STATE ─────────────────────────────────────────────────────────────────────
 let parsedBoosts   = [];
 let parsedCampaign = null;      // totais da campanha de aumento de ganhos do arquivo
-let catFilter      = 'all';     // all | sportsbook | tipster | welcome
+let catFilter      = 'all';     // all | sportsbook | tipster | aumento
 let hideSingleBB   = false;     // oculta BetBuilder com 1 aposta só (ruído de cauda longa)
 let sortCol        = 'stake';
 let sortDir        = -1;        // -1 = desc, 1 = asc
 const SK = 'esportiva_boosts_v3';
 
-// As três classificações manuais. A campanha de aumento de ganhos NÃO entra aqui:
-// ela é transversal — uma linha Welcome pode ter aumento, uma Tipster também.
+// Três vertentes que somam 100% do relatório. Sportsbook e Tipster são marcadas
+// à mão; Aumento de Ganhos é DERIVADA do dado — se a linha tem aposta com
+// aumento, ela pertence à campanha e sai da conta das outras duas.
 const CATS = {
-  sportsbook: { label:'Sportsbook', short:'SPB', icon:'⚡', cls:'spb' },
-  tipster:    { label:'Tipster',    short:'TIP', icon:'🎯', cls:'tip' },
-  welcome:    { label:'Welcome',    short:'WEL', icon:'👋', cls:'wel' },
+  sportsbook: { label:'Sportsbook',        short:'SPB', icon:'⚡', cls:'spb', manual:true  },
+  tipster:    { label:'Tipster',           short:'TIP', icon:'🎯', cls:'tip', manual:true  },
+  aumento:    { label:'Aumento de Ganhos', short:'AUM', icon:'🚀', cls:'aum', manual:false },
 };
-// Aceita tanto o formato novo (`cat`) quanto o antigo (`tipster: true/false`),
-// para o caso de algum caminho de leitura escapar do migrateDay().
+const MANUAL_CATS = Object.keys(CATS).filter(k => CATS[k].manual);
+
+// Basta uma aposta com aumento para a linha ser da campanha. É o corte que
+// garante o que foi pedido: nenhuma aposta com aumento entra em Sportsbook ou
+// Tipster. (Duas linhas do arquivo são mistas e vêm junto — ver README do bloco.)
+const isAumento = b => (b && (b.boostCount||0) > 0);
+
+// Aceita o formato novo (`cat`), o antigo (`tipster: true/false`) e o
+// intermediário (`cat:'welcome'`, descontinuado, que volta a ser sportsbook).
 const catOf = b => {
   if (!b) return 'sportsbook';
-  if (CATS[b.cat]) return b.cat;
-  return b.tipster ? 'tipster' : 'sportsbook';
+  if (isAumento(b)) return 'aumento';
+  if (b.cat === 'tipster' || (b.cat === undefined && b.tipster)) return 'tipster';
+  return 'sportsbook';
 };
 
 // Preencha com as credenciais públicas do projeto no Supabase.
@@ -639,36 +648,41 @@ function isWinBoost(market, betType, price, netPrice) {
 
 function renderCampaignStrip() {
   const el = document.getElementById('campStrip');
-  const c  = parsedCampaign;
-  if (!c || !c.disponivel) {
-    el.classList.remove('show');
-    el.innerHTML = '';
-    return;
-  }
+  const linhas = parsedBoosts.filter(isAumento);
+  if (!linhas.length) { el.classList.remove('show'); el.innerHTML = ''; return; }
   el.classList.add('show');
-  // A campanha conta VoidCashout (é como a provedora reporta), mas a tabela acima
-  // descarta esses status. Sem esta nota o usuário vê dois números e acha que um
-  // está errado.
-  const naTabela = parsedBoosts.reduce((s,b)=>s+(b.boostCount||0),0);
-  const gap = c.count - naTabela;
-  el.innerHTML = campCells(c) + (gap>0
-    ? `<div class="camp-note">A coluna <strong>Aumento</strong> da tabela soma ${naTabela.toLocaleString('pt-BR')}. `+
-      `As ${gap.toLocaleString('pt-BR')} restantes são apostas <strong>VoidCashout</strong>, que a tabela descarta mas a `+
-      `provedora conta como participação. O custo do aumento é idêntico nos dois — VoidCashout não gera pagamento.</div>`
-    : '');
+  el.innerHTML = campBlock(linhas, parsedCampaign);
 }
-// células reaproveitadas na importação e no histórico
-function campCells(c) {
-  const nc = c.net>=0?'green':'red';
-  return `<div class="camp-head"><span class="camp-dot"></span>🚀 Aumento de Ganhos <span class="camp-sub">recorte de dentro do relatório — <strong>não somar</strong> com Sportsbook/Tipster/Welcome</span></div>
+
+// Bloco da vertente. Mostra os números DELA (o que saiu de Sportsbook/Tipster) e,
+// embaixo, a reconciliação com o relatório da provedora — que conta por aposta e
+// inclui VoidCashout, então dá um número diferente do da tabela de propósito.
+function campBlock(linhas, c) {
+  const a  = aggCat(linhas);
+  const nc = a.net>=0?'green':'red';
+  const roi = a.stake ? a.net/a.stake : 0;
+  const semAumento = a.apostas - a.boostCount;
+  return `<div class="camp-head"><span class="camp-dot"></span>🚀 Aumento de Ganhos
+      <span class="camp-sub">vertente própria — fora da conta de Sportsbook e Tipster</span></div>
     <div class="camp-body">
-      <div class="camp-stat"><div class="cs-lbl">Participações</div><div class="cs-val">${(c.count||0).toLocaleString('pt-BR')}</div></div>
-      <div class="camp-stat"><div class="cs-lbl">Usuários</div><div class="cs-val">${(c.userCount||0).toLocaleString('pt-BR')}</div></div>
-      <div class="camp-stat"><div class="cs-lbl">Stake</div><div class="cs-val">R$${fmt(c.stake)}</div></div>
-      <div class="camp-stat"><div class="cs-lbl">Win</div><div class="cs-val">R$${fmt(c.win)}</div></div>
-      <div class="camp-stat"><div class="cs-lbl">Net das apostas</div><div class="cs-val ${nc}">${(c.net>=0?'+':'')+'R$'+fmt(c.net)}</div></div>
-      <div class="camp-stat camp-cost"><div class="cs-lbl">Custo do aumento</div><div class="cs-val red">-R$${fmt(c.extra)}</div></div>
-    </div>`;
+      <div class="camp-stat"><div class="cs-lbl">Linhas</div><div class="cs-val">${a.boosts.toLocaleString('pt-BR')}</div></div>
+      <div class="camp-stat"><div class="cs-lbl">Apostas</div><div class="cs-val">${a.apostas.toLocaleString('pt-BR')}</div></div>
+      <div class="camp-stat"><div class="cs-lbl">Stake</div><div class="cs-val">R$${fmt(a.stake)}</div></div>
+      <div class="camp-stat"><div class="cs-lbl">Win</div><div class="cs-val">R$${fmt(a.win)}</div></div>
+      <div class="camp-stat"><div class="cs-lbl">Net</div><div class="cs-val ${nc}">${(a.net>=0?'+':'')+'R$'+fmt(a.net)}</div>
+        <div class="cs-sub">ROI ${(roi>=0?'+':'')+(roi*100).toFixed(1)}%</div></div>
+      <div class="camp-stat camp-cost"><div class="cs-lbl">Custo do aumento</div><div class="cs-val red">-R$${fmt(a.boostExtra)}</div>
+        <div class="cs-sub">o que a turbinada custou</div></div>
+    </div>
+    ${c && c.count ? `<div class="camp-note">
+      <strong>Conferência com a provedora:</strong> ${c.count.toLocaleString('pt-BR')} participações
+      · custo -R$${fmt(c.extra)}. A vertente acima conta <strong>linhas do relatório</strong>
+      (${a.apostas.toLocaleString('pt-BR')} apostas), a provedora conta <strong>apostas turbinadas</strong>
+      e inclui VoidCashout — por isso os dois números não são iguais.
+      ${semAumento>0 ? `Das ${a.apostas.toLocaleString('pt-BR')} apostas destas linhas,
+        ${a.boostCount.toLocaleString('pt-BR')} receberam aumento e ${semAumento.toLocaleString('pt-BR')} vieram junto
+        por estarem no mesmo evento+mercado.` : ''}
+    </div>` : ''}`;
 }
 
 // ── SORT ──────────────────────────────────────────────────────────────────────
@@ -757,21 +771,27 @@ function renderTable() {
 
 // ── CLASSIFICAÇÃO ─────────────────────────────────────────────────────────────
 function catSeg(idx, cat) {
-  return `<div class="seg">`+Object.entries(CATS).map(([k,v])=>
-    `<button class="seg-btn ${v.cls} ${cat===k?'on':''}" title="${v.label}" onclick="setCat(${idx},'${k}')">${v.short}</button>`
-  ).join('')+`</div>`;
+  // Linha da campanha não é classificável: a vertente vem do dado, não da mão.
+  if (cat === 'aumento') {
+    return `<span class="cat-locked" title="Linha da campanha de aumento de ganhos — não entra em Sportsbook nem Tipster">🚀 Aumento</span>`;
+  }
+  return `<div class="seg">`+MANUAL_CATS.map(k=>{
+    const v = CATS[k];
+    return `<button class="seg-btn ${v.cls} ${cat===k?'on':''}" title="${v.label}" onclick="setCat(${idx},'${k}')">${v.short}</button>`;
+  }).join('')+`</div>`;
 }
 function aumTag(b) {
-  return b.boostCount ? `<span class="boost-tag tag-aumento" title="${b.boostCount} aposta(s) com aumento de ganhos">🚀 Aumento</span>` : '';
+  return b.boostCount ? `<span class="boost-tag tag-aumento" title="${b.boostCount} de ${b.total} aposta(s) com aumento de ganhos">🚀 ${b.boostCount.toLocaleString('pt-BR')}</span>` : '';
 }
 function setCat(idx, cat) {
-  if (!CATS[cat]) return;
+  if (!CATS[cat] || !CATS[cat].manual) return;
+  if (isAumento(parsedBoosts[idx])) return;      // travada na campanha
   parsedBoosts[idx].cat = cat;
   renderTable(); updateSummary();
 }
 function markAll(cat) {
-  if (!CATS[cat]) return;
-  parsedBoosts.forEach(b=>b.cat=cat);
+  if (!CATS[cat] || !CATS[cat].manual) return;
+  parsedBoosts.forEach(b => { if (!isAumento(b)) b.cat = cat; });
   renderTable(); updateSummary();
 }
 function setCatFilter(cat) {
@@ -808,7 +828,7 @@ function updateSummary() {
   document.getElementById('saveSummary').innerHTML =
     `<strong class="c-spb">${c('sportsbook')}</strong> sportsbook &nbsp;·&nbsp; `+
     `<strong class="c-tip">${c('tipster')}</strong> tipster &nbsp;·&nbsp; `+
-    `<strong class="c-wel">${c('welcome')}</strong> welcome`;
+    `<strong class="c-aum">${c('aumento')}</strong> aumento de ganhos`;
 }
 function clearImport() {
   parsedBoosts=[]; parsedCampaign=null; catFilter='all'; hideSingleBB=false; sortCol='stake'; sortDir=-1;
@@ -965,14 +985,15 @@ async function renderHistory() {
 
   cards.innerHTML =
     mkPanel('total',   'Total Geral', aAll)+
-    mkPanel('sport',   '⚡ Sportsbook', aggCat(all.filter(b=>catOf(b)==='sportsbook')))+
-    mkPanel('tipster', '🎯 Tipster',    aggCat(all.filter(b=>catOf(b)==='tipster')))+
-    mkPanel('welcome', '👋 Welcome',    aggCat(all.filter(b=>catOf(b)==='welcome')));
+    mkPanel('sport',   '⚡ Sportsbook',        aggCat(all.filter(b=>catOf(b)==='sportsbook')))+
+    mkPanel('tipster', '🎯 Tipster',           aggCat(all.filter(b=>catOf(b)==='tipster')))+
+    mkPanel('aumento', '🚀 Aumento de Ganhos', aggCat(all.filter(b=>catOf(b)==='aumento')));
 
-  // Campanha somada de todos os dias — bloco à parte
-  const cAll = sumCampaigns(days);
-  document.getElementById('histCampaign').innerHTML = cAll ? campCells(cAll) : '';
-  document.getElementById('histCampaign').classList.toggle('show', !!cAll);
+  // Bloco detalhado da vertente, somado de todos os dias
+  const linhasAum = all.filter(isAumento);
+  const el = document.getElementById('histCampaign');
+  el.innerHTML = linhasAum.length ? campBlock(linhasAum, sumCampaigns(days)) : '';
+  el.classList.toggle('show', linhasAum.length>0);
 
   pills.innerHTML =
     `<span class="day-pill active" onclick="filterDays('all',this)">Todos</span>`+
@@ -1038,7 +1059,6 @@ function renderDayCard(day) {
           <span class="chip chip-gray">${day.boosts.length} boosts</span>
           ${Object.entries(CATS).map(([k,v])=>porCat[k].length
             ? `<span class="chip chip-${v.cls}">${v.icon} ${porCat[k].length} ${v.label.toLowerCase()}</span>` : '').join('')}
-          ${day.campaign&&day.campaign.count?`<span class="chip chip-aum">🚀 ${day.campaign.count.toLocaleString('pt-BR')} c/ aumento</span>`:''}
         </div>
       </div>
       <div class="dh-r">
@@ -1063,10 +1083,10 @@ function renderDayCard(day) {
         </div>
       </div>
 
-      <!-- CAMPANHA DE AUMENTO DE GANHOS (à parte, transversal às categorias) -->
-      ${day.campaign && day.campaign.count ? `<div class="camp-strip show camp-inline">${campCells(day.campaign)}</div>` : ''}
+      <!-- DETALHE DA VERTENTE DE AUMENTO DE GANHOS -->
+      ${porCat.aumento.length ? `<div class="camp-strip show camp-inline">${campBlock(porCat.aumento, day.campaign)}</div>` : ''}
 
-      <!-- COMPARATIVO POR CATEGORIA -->
+      <!-- AS TRÊS VERTENTES (somam o total do dia) -->
       <div class="compare-row">
         ${Object.keys(CATS).map(cpPanel).join('')}
       </div>
@@ -1134,7 +1154,7 @@ async function clearHistory() {
 }
 
 // ── EXPORT ────────────────────────────────────────────────────────────────────
-const EXP_HEAD = ['Data','Classificação','Evento','Boost','Overall Total','Overall Users','Total Stake',
+const EXP_HEAD = ['Data','Vertente','Evento','Boost','Overall Total','Overall Users','Total Stake',
                   'Total Win','Bonus Stake','Bonus Winnings','Net','ROI%','Apostas c/ Aumento',
                   'Stake c/ Aumento','Win c/ Aumento','Custo do Aumento'];
 const EXP_COLS = [12,14,35,55,14,14,14,14,14,14,14,10,18,18,18,18].map(w=>({wch:w}));
@@ -1144,20 +1164,20 @@ const expRow = (dateStr,b) => [dateStr, CATS[catOf(b)].label, b.event, b.market,
 
 // Aba separada com o resumo por categoria + a campanha, para comparação direta.
 function resumoSheet(linhas, campanhas) {
-  const out=[['RESUMO POR CLASSIFICAÇÃO'],
-             ['Classificação','Boosts','Apostas','Stake','Win','Net','ROI%','Apostas c/ Aumento','Custo do Aumento']];
+  const out=[['RESUMO POR VERTENTE — as três somam o Total Geral'],
+             ['Vertente','Boosts','Apostas','Stake','Win','Net','ROI%','Apostas c/ Aumento','Custo do Aumento']];
   const addRow=(lbl,arr)=>{ const a=aggCat(arr); const roi=a.stake?a.net/a.stake:0;
     out.push([lbl,a.boosts,a.apostas,a.stake,a.win,a.net,+(roi*100).toFixed(2),a.boostCount,a.boostExtra]); };
   addRow('TOTAL GERAL', linhas);
   Object.entries(CATS).forEach(([k,v])=>addRow(v.label, linhas.filter(b=>catOf(b)===k)));
   const c = campanhas;
-  if (c) {
-    out.push([], ['CAMPANHA DE AUMENTO DE GANHOS (transversal — não somar com o quadro acima)'],
+  if (c && c.count) {
+    out.push([], ['CONFERÊNCIA COM A PROVEDORA (conta por aposta turbinada, inclui VoidCashout)'],
       ['Participações','Usuários','Stake','Win','Net das apostas','Custo do aumento'],
       [c.count, c.userCount, c.stake, c.win, c.net, -c.extra]);
   }
   const ws=XLSX.utils.aoa_to_sheet(out);
-  ws['!cols']=[42,12,12,14,14,14,10,20,18].map(w=>({wch:w}));
+  ws['!cols']=[46,12,12,14,14,14,10,20,18].map(w=>({wch:w}));
   return ws;
 }
 
@@ -1215,12 +1235,14 @@ function sumCampaigns(days) {
 }
 
 // ── STORAGE ───────────────────────────────────────────────────────────────────
-// Dias salvos antes das categorias guardavam `tipster: true/false`. Normalizamos
-// na leitura para que o histórico antigo continue somando certo.
+// Normaliza formatos antigos: `tipster: true/false` (antes das vertentes) e
+// `cat: 'welcome'` (vertente descontinuada, volta a ser sportsbook). A vertente
+// de aumento não é gravada em `cat` — ela é derivada de boostCount pelo catOf.
 function migrateDay(day) {
   return { ...day, boosts: (day.boosts||[]).map(b => {
-    if (b.cat && CATS[b.cat]) return b;
-    return { ...b, cat: b.tipster ? 'tipster' : 'sportsbook' };
+    if (b.cat === 'tipster' || b.cat === 'sportsbook') return b;
+    if (b.cat === undefined && b.tipster) return { ...b, cat:'tipster' };
+    return { ...b, cat:'sportsbook' };
   })};
 }
 function loadDaysLocal() { try { return (JSON.parse(localStorage.getItem(SK)||'[]')).map(migrateDay); } catch { return []; } }
