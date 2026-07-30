@@ -8,7 +8,8 @@ No SQL Editor do projeto Supabase, execute:
 create table if not exists public.boost_days (
   date text primary key,
   saved_at timestamptz not null default now(),
-  boosts jsonb not null default '[]'::jsonb
+  boosts jsonb not null default '[]'::jsonb,
+  campaign jsonb
 );
 
 alter table public.boost_days enable row level security;
@@ -30,6 +31,19 @@ create policy "boost days public delete"
 on public.boost_days for delete
 using (true);
 ```
+
+## 1b. Migracao — coluna `campaign` (tabela ja existente)
+
+Se a tabela foi criada antes da campanha de aumento de ganhos, rode:
+
+```sql
+alter table public.boost_days add column if not exists campaign jsonb;
+```
+
+Essa coluna guarda os totais da campanha de aumento de ganhos de cada dia
+(participacoes, usuarios, stake, win, net e custo do aumento). Sem ela o
+dashboard continua salvando os boosts normalmente, mas avisa que os dados da
+campanha nao foram gravados.
 
 ## 2. Informar as credenciais
 
