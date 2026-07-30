@@ -118,7 +118,6 @@ body { background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui
 
 /* coluna de aumento de ganhos */
 .aum-n { font-weight:700; color:var(--blue); }
-.aum-cost { font-size:10px; color:var(--red); margin-top:1px; }
 .tag-aumento { background:rgba(96,165,250,.18); color:var(--blue); }
 
 /* BLOCO DA CAMPANHA DE AUMENTO DE GANHOS */
@@ -131,7 +130,6 @@ body { background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui
 .camp-body { display:grid; grid-template-columns:repeat(6,1fr); }
 .camp-stat { padding:12px 16px; border-right:1px solid rgba(96,165,250,.14); }
 .camp-stat:last-child { border-right:none; }
-.camp-stat.camp-cost { background:rgba(239,68,68,.05); }
 .cs-lbl { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--t2); margin-bottom:4px; }
 .cs-val { font-size:16px; font-weight:800; }
 .cs-sub { font-size:10px; color:var(--t3); margin-top:3px; }
@@ -667,16 +665,15 @@ function campBlock(linhas, c) {
     <div class="camp-body">
       <div class="camp-stat"><div class="cs-lbl">Linhas</div><div class="cs-val">${a.boosts.toLocaleString('pt-BR')}</div></div>
       <div class="camp-stat"><div class="cs-lbl">Apostas</div><div class="cs-val">${a.apostas.toLocaleString('pt-BR')}</div></div>
+      <div class="camp-stat"><div class="cs-lbl">Usuários</div><div class="cs-val">${(c&&c.userCount?c.userCount:0).toLocaleString('pt-BR')}</div></div>
       <div class="camp-stat"><div class="cs-lbl">Stake</div><div class="cs-val">R$${fmt(a.stake)}</div></div>
       <div class="camp-stat"><div class="cs-lbl">Win</div><div class="cs-val">R$${fmt(a.win)}</div></div>
       <div class="camp-stat"><div class="cs-lbl">Net</div><div class="cs-val ${nc}">${(a.net>=0?'+':'')+'R$'+fmt(a.net)}</div>
         <div class="cs-sub">ROI ${(roi>=0?'+':'')+(roi*100).toFixed(1)}%</div></div>
-      <div class="camp-stat camp-cost"><div class="cs-lbl">Custo do aumento</div><div class="cs-val red">-R$${fmt(a.boostExtra)}</div>
-        <div class="cs-sub">o que a turbinada custou</div></div>
     </div>
     ${c && c.count ? `<div class="camp-note">
-      <strong>Conferência com a provedora:</strong> ${c.count.toLocaleString('pt-BR')} participações
-      · custo -R$${fmt(c.extra)}. A vertente acima conta <strong>linhas do relatório</strong>
+      <strong>Conferência com a provedora:</strong> ${c.count.toLocaleString('pt-BR')} participações.
+      A vertente acima conta <strong>linhas do relatório</strong>
       (${a.apostas.toLocaleString('pt-BR')} apostas), a provedora conta <strong>apostas turbinadas</strong>
       e inclui VoidCashout — por isso os dois números não são iguais.
       ${semAumento>0 ? `Das ${a.apostas.toLocaleString('pt-BR')} apostas destas linhas,
@@ -737,7 +734,7 @@ function renderTable() {
       <td class="num num-val">R$${fmt(b.bonusWin)}</td>
       <td class="num num-val ${nc}">${(b.net>=0?'+':'')+'R$'+fmt(b.net)}</td>
       <td class="num">${roiTag}</td>
-      <td class="num num-val">${b.boostCount ? `<span class="aum-n">${b.boostCount.toLocaleString('pt-BR')}</span><div class="aum-cost">-R$${fmt(b.boostExtra)}</div>` : '<span style="color:var(--t3)">—</span>'}</td>
+      <td class="num num-val">${b.boostCount ? `<span class="aum-n">${b.boostCount.toLocaleString('pt-BR')}</span>` : '<span style="color:var(--t3)">—</span>'}</td>
       <td class="cat-toggle">${catSeg(idx, cat)}</td>
     </tr>`;
   }).join('');
@@ -763,7 +760,7 @@ function renderTable() {
       <td class="num"><strong>R$${fmt(tot.bonusWin)}</strong></td>
       <td class="num ${nc} bold">${(tot.net>=0?'+':'')+'R$'+fmt(tot.net)}</td>
       <td class="num">${rTag}</td>
-      <td class="num"><strong>${tot.boostCount.toLocaleString('pt-BR')}</strong><div class="aum-cost">-R$${fmt(tot.boostExtra)}</div></td>
+      <td class="num"><strong>${tot.boostCount.toLocaleString('pt-BR')}</strong></td>
       <td></td>
     </tr>`;
   } else { tfoot.innerHTML=''; }
@@ -1023,8 +1020,7 @@ function renderDayCard(day) {
           <div><div class="cp-s-lbl">Win</div><div class="cp-s-val">R$${fmt(a.win)}</div></div>
           <div><div class="cp-s-lbl">Bonus Stake</div><div class="cp-s-val">R$${fmt(a.bonusStake)}</div></div>
           <div><div class="cp-s-lbl">Bonus Win</div><div class="cp-s-val">R$${fmt(a.bonusWin)}</div></div>
-          <div><div class="cp-s-lbl">Com aumento</div><div class="cp-s-val">${a.boostCount.toLocaleString('pt-BR')}</div></div>
-          <div><div class="cp-s-lbl">Custo aumento</div><div class="cp-s-val ${a.boostExtra?'red':''}">${a.boostExtra?'-R$'+fmt(a.boostExtra):'—'}</div></div>
+          ${key==='aumento'?`<div style="grid-column:1/-1"><div class="cp-s-lbl">Apostas com aumento</div><div class="cp-s-val">${a.boostCount.toLocaleString('pt-BR')} de ${a.total.toLocaleString('pt-BR')}</div></div>`:''}
           <div style="grid-column:1/-1"><div class="cp-s-lbl">Net</div><div class="cp-s-val ${a.net>=0?'green':'red'} bold">${(a.net>=0?'+':'')+'R$'+fmt(a.net)}</div></div>
           <div style="grid-column:1/-1"><div class="cp-s-lbl">ROI</div><div class="cp-s-val ${roiV>=0?'green':'red'}">${(roiV>=0?'+':'')+(roiV*100).toFixed(1)}%</div></div>
         </div>`;
