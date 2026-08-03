@@ -31,6 +31,8 @@
 .c-spb { color:var(--green); }
 .c-tip { color:var(--orange); }
 .c-aum { color:var(--blue); }
+/* Sportsbook + Tipster somados (a operação sem a campanha de aumento) */
+.c-sem { color:var(--purple); }
 body { background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui,sans-serif; font-size:13px; min-height:100vh; }
 
 /* TOPBAR */
@@ -96,17 +98,17 @@ body { background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui
 .fs-btn[data-cat="sportsbook"].active { background:rgba(34,197,94,.18);  color:var(--green); }
 .fs-btn[data-cat="tipster"].active    { background:rgba(255,85,0,.18);   color:var(--orange); }
 .fs-btn[data-cat="aumento"].active    { background:rgba(96,165,250,.18); color:var(--blue); }
+.fs-btn[data-cat="semaum"].active     { background:rgba(168,85,247,.18); color:var(--purple); }
 .mark-all { display:inline-flex; align-items:center; gap:4px; font-size:11px; color:var(--t3); }
 
 /* SELETOR DE CLASSIFICAÇÃO NA LINHA */
 .cat-toggle { text-align:center; }
 .seg { display:inline-flex; gap:2px; background:var(--bg3); padding:2px; border-radius:5px; }
-.seg-btn { padding:4px 11px; border:none; background:transparent; color:var(--t3); border-radius:3px; cursor:pointer; font-size:10px; font-weight:800; letter-spacing:.4px; transition:all .12s; }
+.seg-btn { padding:4px 10px; border:none; background:transparent; color:var(--t3); border-radius:3px; cursor:pointer; font-size:10px; font-weight:800; letter-spacing:.4px; transition:all .12s; }
 .seg-btn:hover { color:var(--text); background:var(--bg4); }
 .seg-btn.spb.on { background:rgba(34,197,94,.2);  color:var(--green); }
 .seg-btn.tip.on { background:rgba(255,85,0,.2);   color:var(--orange); }
-/* linha da campanha: vertente vem do dado, não se escolhe */
-.cat-locked { display:inline-flex; align-items:center; gap:4px; padding:4px 10px; border-radius:20px; font-size:10px; font-weight:800; letter-spacing:.4px; background:rgba(96,165,250,.15); color:var(--blue); border:1px solid rgba(96,165,250,.35); white-space:nowrap; cursor:default; }
+.seg-btn.aum.on { background:rgba(96,165,250,.2); color:var(--blue); }
 
 /* faixa lateral colorida por vertente na linha da tabela */
 #boostTable tbody tr.row-tip td:first-child { box-shadow:inset 3px 0 0 var(--orange); }
@@ -118,7 +120,10 @@ body { background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui
 
 /* coluna de aumento de ganhos */
 .aum-n { font-weight:700; color:var(--blue); }
+.aum-n.off { color:var(--t3); text-decoration:line-through; }
 .tag-aumento { background:rgba(96,165,250,.18); color:var(--blue); }
+/* linha que TEM aposta turbinada mas foi desmarcada da vertente à mão */
+.tag-aumento-off { background:rgba(255,255,255,.06); color:var(--t3); text-decoration:line-through; }
 
 /* BLOCO DA CAMPANHA DE AUMENTO DE GANHOS */
 .camp-strip { display:none; margin-bottom:16px; background:linear-gradient(180deg,rgba(96,165,250,.07),transparent); border:1px solid rgba(96,165,250,.3); border-radius:8px; overflow:hidden; }
@@ -128,15 +133,29 @@ body { background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui
 .camp-head .camp-dot { width:7px; height:7px; border-radius:50%; background:currentColor; flex-shrink:0; }
 .camp-sub { font-size:10px; font-weight:600; text-transform:none; letter-spacing:0; color:var(--t3); margin-left:4px; }
 .camp-body { display:grid; grid-template-columns:repeat(6,1fr); }
-.camp-stat { padding:12px 16px; border-right:1px solid rgba(96,165,250,.14); }
+.camp-stat { padding:12px 16px; border-right:1px solid rgba(96,165,250,.14); min-width:0; }
 .camp-stat:last-child { border-right:none; }
-.cs-lbl { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--t2); margin-bottom:4px; }
-.cs-val { font-size:16px; font-weight:800; }
-.cs-sub { font-size:10px; color:var(--t3); margin-top:3px; }
+.cs-lbl { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--t2); margin-bottom:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.cs-val { font-size:16px; font-weight:800; font-variant-numeric:tabular-nums; letter-spacing:-.2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.cs-sub { font-size:10px; color:var(--t3); margin-top:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .camp-note { padding:9px 16px; border-top:1px solid rgba(96,165,250,.18); font-size:11px; color:var(--t2); line-height:1.5; }
 .camp-note strong { color:var(--blue); }
-@media(max-width:900px){ .camp-body { grid-template-columns:repeat(3,1fr); } }
-@media(max-width:560px){ .camp-body { grid-template-columns:repeat(2,1fr); } }
+@media(max-width:1150px){ .camp-body { grid-template-columns:repeat(3,1fr); } }
+@media(max-width:640px){  .camp-body { grid-template-columns:repeat(2,1fr); } }
+
+/* BLOCO SPORTSBOOK + TIPSTER — o resultado da operação sem a campanha */
+.sub-strip { display:none; margin-bottom:16px; background:linear-gradient(180deg,rgba(168,85,247,.06),transparent); border:1px solid rgba(168,85,247,.28); border-radius:8px; overflow:hidden; }
+.sub-strip.show { display:block; }
+.sub-strip.sub-inline { margin:0; border-radius:0; border-left:none; border-right:none; border-top:none; }
+.sub-head { display:flex; align-items:center; gap:8px; padding:11px 16px; border-bottom:1px solid rgba(168,85,247,.2); font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.7px; color:var(--purple); flex-wrap:wrap; }
+.sub-head .sub-dot { width:7px; height:7px; border-radius:50%; background:currentColor; flex-shrink:0; }
+.sub-body { display:grid; grid-template-columns:repeat(5,1fr); }
+.sub-body .camp-stat { border-right-color:rgba(168,85,247,.14); }
+/* quebra do SPB vs TIP: rodapé em linha, não uma célula espremida na grade */
+.strip-foot { display:flex; flex-wrap:wrap; gap:5px 24px; padding:9px 16px; border-top:1px solid rgba(168,85,247,.18); font-size:11px; color:var(--t2); }
+.strip-foot strong { font-variant-numeric:tabular-nums; }
+@media(max-width:1000px){ .sub-body { grid-template-columns:repeat(3,1fr); } }
+@media(max-width:640px){  .sub-body { grid-template-columns:repeat(2,1fr); } }
 
 /* aviso do que está oculto — o TOTAL da tabela não inclui essas linhas */
 .hidden-note { display:none; margin:-4px 0 12px; padding:7px 12px; background:rgba(59,130,246,.07); border:1px solid rgba(59,130,246,.25); border-left:3px solid #60a5fa; border-radius:var(--r); font-size:11px; color:var(--t2); }
@@ -213,42 +232,71 @@ body { background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui
 .hist-meta .m-item { font-size:12px; color:var(--t2); }
 .hist-meta .m-item strong { color:var(--text); }
 
-/* Summary 3 panels */
-.summary-panels { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:16px; }
+/* Summary panels */
+.summary-panels { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; margin-bottom:16px; }
 .sum-panel { background:var(--bg2); border:1px solid var(--border); border-radius:8px; overflow:hidden; }
 .sum-panel.panel-total   { border-color:var(--bord2); }
+.sum-panel.panel-semaum  { border-color:rgba(168,85,247,.4); }
 .sum-panel.panel-sport   { border-color:rgba(34,197,94,.3); }
 .sum-panel.panel-tipster { border-color:rgba(255,85,0,.35); }
 .sum-panel.panel-aumento { border-color:rgba(96,165,250,.4); }
 .panel-aumento .ph-title { color:var(--blue); }
+.panel-semaum  .ph-title { color:var(--purple); }
+.ph-sub { font-size:9px; font-weight:600; text-transform:none; letter-spacing:0; color:var(--t3); margin-left:auto; white-space:nowrap; }
 .sum-panel-head { padding:12px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:8px; }
 .sum-panel-head .ph-title { font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.7px; }
 .panel-total   .ph-title { color:var(--text); }
 .panel-sport   .ph-title { color:var(--green); }
 .panel-tipster .ph-title { color:var(--orange); }
 .sum-panel-head .ph-dot { width:7px; height:7px; border-radius:50%; background:currentColor; flex-shrink:0; }
+/* Boosts e Apostas dividem a primeira linha; Stake e Net ocupam a largura toda —
+   é o que impede o valor em reais de estourar a caixa quando são 5 painéis. */
 .sum-panel-body { display:grid; grid-template-columns:1fr 1fr; }
-.sum-stat { padding:14px 16px; border-right:1px solid var(--border); border-bottom:1px solid var(--border); }
-.sum-stat:nth-child(2n) { border-right:none; }
-.sum-stat:nth-last-child(-n+2) { border-bottom:none; }
-.sum-stat .ss-lbl { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--t2); margin-bottom:5px; }
-.sum-stat .ss-val { font-size:18px; font-weight:800; }
-.sum-stat .ss-val.big { font-size:20px; }
-@media(max-width:1100px){ .summary-panels { grid-template-columns:repeat(2,1fr); } }
-@media(max-width:620px){  .summary-panels { grid-template-columns:1fr; } }
+.sum-stat { padding:12px 15px; border-right:1px solid var(--border); border-bottom:1px solid var(--border); min-width:0; }
+.sum-stat.wide { grid-column:1/-1; border-right:none; }
+.sum-stat:nth-child(2) { border-right:none; }
+.sum-stat:last-child { border-bottom:none; }
+.sum-stat .ss-lbl { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--t2); margin-bottom:5px; white-space:nowrap; }
+.sum-stat .ss-val { font-size:17px; font-weight:800; font-variant-numeric:tabular-nums; letter-spacing:-.3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.sum-stat .ss-val.big { font-size:19px; }
+@media(max-width:1100px){ .summary-panels { grid-template-columns:repeat(3,1fr); } }
+@media(max-width:820px){  .summary-panels { grid-template-columns:repeat(2,1fr); } }
+@media(max-width:560px){  .summary-panels { grid-template-columns:1fr; } }
 
-/* Day pills */
-.day-pills { display:flex; gap:6px; margin-bottom:16px; flex-wrap:wrap; }
-.day-pill { padding:4px 12px; border-radius:20px; border:1px solid var(--bord2); background:var(--bg2); color:var(--t2); cursor:pointer; font-size:11px; font-weight:600; transition:all .15s; }
-.day-pill:hover { border-color:var(--orange); color:var(--text); }
-.day-pill.active { background:var(--orange); border-color:var(--orange); color:#fff; }
+/* Pills (mês e dia) */
+.pill-row { display:flex; gap:6px; margin-bottom:12px; flex-wrap:wrap; align-items:center; }
+.pill-lbl { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.6px; color:var(--t3); margin-right:2px; }
+.month-pill { padding:6px 14px; border-radius:20px; border:1px solid var(--bord2); background:var(--bg2); color:var(--t2); cursor:pointer; font-size:12px; font-weight:700; transition:all .15s; }
+.month-pill:hover { border-color:var(--orange); color:var(--text); }
+.month-pill.active { background:var(--orange); border-color:var(--orange); color:#fff; }
+.month-pill em { font-style:normal; font-weight:600; opacity:.65; font-size:10px; margin-left:5px; }
 
-/* Day card */
-.day-card { background:var(--bg2); border:1px solid var(--border); border-radius:8px; margin-bottom:12px; overflow:hidden; }
-.day-head { display:flex; align-items:center; justify-content:space-between; padding:14px 18px; cursor:pointer; user-select:none; transition:background .15s; }
-.day-head:hover { background:var(--bg3); }
-.dh-l { display:flex; align-items:center; gap:12px; }
-.dh-date { font-size:14px; font-weight:700; }
+/* Month card — agrupa os dias do mês */
+.month-card { background:var(--bg2); border:1px solid var(--bord2); border-radius:9px; margin-bottom:16px; overflow:hidden; }
+.month-head { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 18px; cursor:pointer; user-select:none; background:var(--bg3); transition:background .15s; flex-wrap:wrap; }
+.month-head:hover { background:var(--bg4); }
+.mh-l { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+.mh-title { font-size:15px; font-weight:800; }
+.mh-r { display:flex; align-items:center; gap:12px; }
+.mh-net { font-size:15px; font-weight:800; }
+.month-body { display:none; border-top:1px solid var(--border); }
+.month-body.open { display:block; }
+.month-days { padding:14px 16px 16px; }
+.month-days-title { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.6px; color:var(--t2); margin-bottom:9px; }
+
+/* Linha de dia dentro do mês — clicar abre o modal com as linhas do dia */
+.day-row { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:11px 14px; background:var(--bg2); border:1px solid var(--border); border-radius:var(--r); margin-bottom:8px; cursor:pointer; user-select:none; transition:all .15s; flex-wrap:wrap; }
+.day-row:hover { background:var(--bg3); border-color:var(--bord2); }
+.day-row:last-child { margin-bottom:0; }
+.dr-l { display:flex; align-items:center; gap:12px; flex-wrap:wrap; min-width:0; }
+.dr-date { font-size:13px; font-weight:700; white-space:nowrap; }
+.dr-r { display:flex; align-items:center; gap:18px; flex-wrap:wrap; margin-left:auto; }
+.dr-n { font-size:11px; color:var(--t2); white-space:nowrap; }
+.dr-n strong { color:var(--text); font-size:13px; font-variant-numeric:tabular-nums; margin-left:4px; }
+.dr-net { font-size:13px; font-weight:800; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.dr-go { color:var(--t3); font-size:16px; line-height:1; }
+.day-row:hover .dr-go { color:var(--orange); }
+
 .dh-chips { display:flex; gap:5px; flex-wrap:wrap; }
 .chip { padding:2px 8px; border-radius:3px; font-size:10px; font-weight:700; letter-spacing:.4px; }
 .chip-orange { background:rgba(255,85,0,.15); color:var(--orange); }
@@ -257,20 +305,18 @@ body { background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui
 .chip-spb    { background:rgba(34,197,94,.12);  color:var(--green); }
 .chip-tip    { background:rgba(255,85,0,.15);   color:var(--orange); }
 .chip-aum    { background:rgba(96,165,250,.15); color:var(--blue); }
-.dh-r { display:flex; align-items:center; gap:12px; }
-.dh-net { font-size:14px; font-weight:800; }
 .chevron { color:var(--t3); font-size:12px; transition:transform .2s; display:inline-block; }
 .chevron.open { transform:rotate(180deg); }
 
-.day-body { display:none; border-top:1px solid var(--border); }
-.day-body.open { display:block; }
-
-/* TOTAL row inside day */
+/* TOTAL row (dia no modal e mês no card) */
 .day-total-row { display:grid; grid-template-columns:repeat(6,1fr); gap:0; border-bottom:1px solid var(--border); background:var(--bg3); }
-.day-total-cell { padding:12px 16px; border-right:1px solid var(--border); }
+.day-total-row.split-row { grid-template-columns:repeat(2,1fr); }
+.day-total-cell { padding:12px 16px; border-right:1px solid var(--border); min-width:0; }
 .day-total-cell:last-child { border-right:none; }
-.dtc-lbl { font-size:10px; color:var(--t2); text-transform:uppercase; letter-spacing:.5px; margin-bottom:4px; }
-.dtc-val { font-size:15px; font-weight:800; }
+.dtc-lbl { font-size:10px; color:var(--t2); text-transform:uppercase; letter-spacing:.5px; margin-bottom:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.dtc-val { font-size:15px; font-weight:800; font-variant-numeric:tabular-nums; letter-spacing:-.2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+@media(max-width:1000px){ .day-total-row { grid-template-columns:repeat(3,1fr); } }
+@media(max-width:600px){  .day-total-row, .day-total-row.split-row { grid-template-columns:repeat(2,1fr); } }
 
 /* Compare panels */
 .compare-row { display:grid; grid-template-columns:repeat(3,1fr); border-bottom:1px solid var(--border); }
@@ -312,14 +358,19 @@ body { background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui
 .modal-actions { display:flex; justify-content:flex-end; gap:8px; padding:0 18px 16px; }
 .modal-actions .btn { min-width:104px; justify-content:center; }
 
+/* MODAL LARGO — detalhe do dia */
+.modal-wide { width:min(1120px,100%); max-height:88vh; display:flex; flex-direction:column; }
+.modal-wide .modal-header { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 18px; flex-wrap:wrap; flex-shrink:0; }
+.modal-wide .modal-body { padding:0; color:var(--text); overflow-y:auto; overflow-x:hidden; flex:1; min-height:0; }
+.mw-actions { display:flex; align-items:center; gap:8px; }
+.mw-title { display:flex; align-items:center; gap:12px; flex-wrap:wrap; min-width:0; }
+.notes-block { border-bottom:1px solid var(--border); background:rgba(96,165,250,.04); }
+.notes-block .camp-note:first-child { border-top:none; }
+
 @media(max-width:900px){
   .compare-row { grid-template-columns:1fr; }
   .compare-panel { border-right:none; border-bottom:1px solid var(--border); }
   .compare-panel:last-child { border-bottom:none; }
-}
-@media(max-width:700px){
-  .day-total-row { grid-template-columns:repeat(3,1fr); }
-  .cards { grid-template-columns:repeat(2,1fr); }
 }
 </style>
 </head>
@@ -361,6 +412,9 @@ body { background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui
       <div class="info-cell"><div class="lbl">Net Total</div><div class="val" id="vNet">—</div></div>
     </div>
 
+    <!-- SPORTSBOOK + TIPSTER — o resultado sem a campanha de aumento -->
+    <div class="sub-strip" id="semAumStrip"></div>
+
     <!-- CAMPANHA DE AUMENTO DE GANHOS — bloco à parte, transversal às categorias -->
     <div class="camp-strip" id="campStrip"></div>
 
@@ -370,6 +424,7 @@ body { background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui
       </div>
       <div class="filter-seg" id="catFilterSeg">
         <button class="fs-btn active" data-cat="all"        onclick="setCatFilter('all')">Todos</button>
+        <button class="fs-btn"        data-cat="semaum"     onclick="setCatFilter('semaum')" title="Sportsbook + Tipster, sem as linhas de aumento de ganhos">SPB+TIP</button>
         <button class="fs-btn"        data-cat="sportsbook" onclick="setCatFilter('sportsbook')">⚡ Sportsbook</button>
         <button class="fs-btn"        data-cat="tipster"    onclick="setCatFilter('tipster')">🎯 Tipster</button>
         <button class="fs-btn"        data-cat="aumento"    onclick="setCatFilter('aumento')">🚀 Aumento</button>
@@ -378,6 +433,7 @@ body { background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui
       <span class="mark-all">Marcar classificáveis:
         <button class="btn btn-ghost btn-sm" onclick="markAll('sportsbook')">SPB</button>
         <button class="btn btn-ghost btn-sm" onclick="markAll('tipster')">TIP</button>
+        <button class="btn btn-ghost btn-sm" onclick="restoreAumento()" title="Devolve para a vertente Aumento de Ganhos todas as linhas desmarcadas à mão">↺ AUM</button>
       </span>
       <button class="btn btn-ghost" style="margin-left:auto" onclick="clearImport()">↩ Novo arquivo</button>
     </div>
@@ -398,7 +454,7 @@ body { background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui
             <th class="num sortable" data-col="net"        onclick="sortBy('net')">Net</th>
             <th class="num sortable" data-col="roi"        onclick="sortBy('roi')">ROI</th>
             <th class="num sortable" data-col="boostCount" onclick="sortBy('boostCount')">Aumento</th>
-            <th style="text-align:center;width:150px">Classificação</th>
+            <th style="text-align:center;width:172px">Classificação</th>
           </tr>
         </thead>
         <tbody id="boostBody"></tbody>
@@ -421,15 +477,32 @@ body { background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui
   <div class="hist-top">
     <h2>Histórico de Boosts</h2>
     <div style="display:flex;gap:8px">
-      <button class="btn btn-ghost" onclick="exportHistory()">⬇ Exportar Excel</button>
+      <button class="btn btn-ghost" id="btnExportHist" onclick="exportHistory()">⬇ Exportar Excel</button>
       <button class="btn btn-red"   onclick="clearHistory()">🗑 Limpar tudo</button>
     </div>
   </div>
-  <div class="hist-meta"     id="histMeta"></div>
+  <div class="pill-row"       id="monthPills"></div>
+  <div class="hist-meta"      id="histMeta"></div>
   <div class="summary-panels" id="histCards"></div>
-  <div class="camp-strip"     id="histCampaign"></div>
-  <div class="day-pills"      id="dayPills"></div>
   <div id="histContent"></div>
+</div>
+
+<!-- MODAL DO DIA — as linhas do dia saem daqui, não mais inline no histórico -->
+<div class="modal-backdrop" id="dayModal">
+  <div class="modal modal-wide" role="dialog" aria-modal="true" aria-labelledby="dayModalTitle">
+    <div class="modal-header">
+      <div class="mw-title">
+        <span class="modal-title" id="dayModalTitle">Dia</span>
+        <div class="dh-chips" id="dayModalChips"></div>
+      </div>
+      <div class="mw-actions">
+        <button class="btn btn-ghost btn-sm" type="button" id="dayModalEdit">✎ Editar</button>
+        <button class="btn btn-red btn-sm"   type="button" id="dayModalDelete">🗑 Excluir</button>
+        <button class="btn btn-ghost btn-sm" type="button" id="dayModalClose" aria-label="Fechar">✕</button>
+      </div>
+    </div>
+    <div class="modal-body" id="dayModalBody"></div>
+  </div>
 </div>
 
 <div class="modal-backdrop" id="confirmModal">
@@ -453,10 +526,12 @@ body { background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui
 // ── STATE ─────────────────────────────────────────────────────────────────────
 let parsedBoosts   = [];
 let parsedCampaign = null;      // totais da campanha de aumento de ganhos do arquivo
-let catFilter      = 'all';     // all | sportsbook | tipster | aumento
+let catFilter      = 'all';     // all | semaum | sportsbook | tipster | aumento
 let hideSingleBB   = false;     // oculta BetBuilder com 1 aposta só (ruído de cauda longa)
 let sortCol        = 'stake';
 let sortDir        = -1;        // -1 = desc, 1 = asc
+let monthFilter    = 'all';     // all | 'AAAA-MM' — recorte do histórico
+let cachedDays     = null;      // evita ir ao Supabase a cada troca de mês
 const SK = 'esportiva_boosts_v3';
 
 // Três vertentes que somam 100% do relatório. Sportsbook e Tipster são marcadas
@@ -469,10 +544,14 @@ const CATS = {
 };
 const MANUAL_CATS = Object.keys(CATS).filter(k => CATS[k].manual);
 
-// Basta uma aposta com aumento para a linha ser da campanha. É o corte que
+// Basta uma aposta com aumento para a linha entrar na campanha. É o corte que
 // garante o que foi pedido: nenhuma aposta com aumento entra em Sportsbook ou
 // Tipster. (Duas linhas do arquivo são mistas e vêm junto — ver README do bloco.)
-const isAumento = b => (b && (b.boostCount||0) > 0);
+const hasBoost = b => (b && (b.boostCount||0) > 0);
+// `aumOff` é o override manual: a linha tem aposta turbinada, mas foi desmarcada
+// da vertente na mão e volta a valer como Sportsbook/Tipster.
+const isAumento = b => hasBoost(b) && !b.aumOff;
+const desmarcada = b => hasBoost(b) && !!b.aumOff;
 
 // Aceita o formato novo (`cat`), o antigo (`tipster: true/false`) e o
 // intermediário (`cat:'welcome'`, descontinuado, que volta a ser sportsbook).
@@ -482,6 +561,7 @@ const catOf = b => {
   if (b.cat === 'tipster' || (b.cat === undefined && b.tipster)) return 'tipster';
   return 'sportsbook';
 };
+const semAumento = arr => arr.filter(b => catOf(b) !== 'aumento');
 
 // Preencha com as credenciais públicas do projeto no Supabase.
 const SUPABASE_URL = 'https://lfuhmhubafgjqzuueyzw.supabase.co';
@@ -601,7 +681,7 @@ function parseBoosts(rows) {
   parsedBoosts = Object.values(groups).map(g => {
     const net = g.stake - g.win;
     const roi = g.stake ? net/g.stake : 0;
-    return { event:g.event, market:g.market, cat:'sportsbook', total:g.total, userCount:g.users.size,
+    return { event:g.event, market:g.market, cat:'sportsbook', aumOff:false, total:g.total, userCount:g.users.size,
              stake:g.stake, win:g.win, bonusStake:g.bonusStake, bonusWin:g.bonusWin, net, roi,
              boostCount:g.boostCount, boostStake:g.boostStake, boostWin:g.boostWin, boostExtra:g.boostExtra };
   });
@@ -622,7 +702,7 @@ function parseBoosts(rows) {
   dz.style.display = 'none';
   document.getElementById('import-result').style.display = 'block';
   sortCol='stake'; sortDir=-1;
-  renderCampaignStrip();
+  renderVertenteStrips();
   renderTable();
   updateSummary();
 }
@@ -644,22 +724,28 @@ function isWinBoost(market, betType, price, netPrice) {
   return countLegs(m) >= 3;                                  // piso da campanha
 }
 
-function renderCampaignStrip() {
-  const el = document.getElementById('campStrip');
+// Atualiza os dois blocos de vertente da tela de importação.
+function renderVertenteStrips() {
+  const camp = document.getElementById('campStrip');
   const linhas = parsedBoosts.filter(isAumento);
-  if (!linhas.length) { el.classList.remove('show'); el.innerHTML = ''; return; }
-  el.classList.add('show');
-  el.innerHTML = campBlock(linhas, parsedCampaign);
+  const off    = parsedBoosts.filter(desmarcada);
+  const temCamp = linhas.length > 0 || off.length > 0;
+  camp.classList.toggle('show', temCamp);
+  camp.innerHTML = temCamp ? campBlock(linhas, parsedCampaign, off) : '';
+
+  const sem = document.getElementById('semAumStrip');
+  const arr = semAumento(parsedBoosts);
+  sem.classList.toggle('show', arr.length > 0);
+  sem.innerHTML = arr.length ? semAumBlock(arr) : '';
 }
 
 // Bloco da vertente. Mostra os números DELA (o que saiu de Sportsbook/Tipster) e,
 // embaixo, a reconciliação com o relatório da provedora — que conta por aposta e
 // inclui VoidCashout, então dá um número diferente do da tabela de propósito.
-function campBlock(linhas, c) {
+function campBlock(linhas, c, off=[]) {
   const a  = aggCat(linhas);
   const nc = a.net>=0?'green':'red';
   const roi = a.stake ? a.net/a.stake : 0;
-  const semAumento = a.apostas - a.boostCount;
   return `<div class="camp-head"><span class="camp-dot"></span>🚀 Aumento de Ganhos
       <span class="camp-sub">vertente própria — fora da conta de Sportsbook e Tipster</span></div>
     <div class="camp-body">
@@ -668,18 +754,55 @@ function campBlock(linhas, c) {
       <div class="camp-stat"><div class="cs-lbl">Usuários</div><div class="cs-val">${(c&&c.userCount?c.userCount:0).toLocaleString('pt-BR')}</div></div>
       <div class="camp-stat"><div class="cs-lbl">Stake</div><div class="cs-val">R$${fmt(a.stake)}</div></div>
       <div class="camp-stat"><div class="cs-lbl">Win</div><div class="cs-val">R$${fmt(a.win)}</div></div>
-      <div class="camp-stat"><div class="cs-lbl">Net</div><div class="cs-val ${nc}">${(a.net>=0?'+':'')+'R$'+fmt(a.net)}</div>
+      <div class="camp-stat"><div class="cs-lbl">Net</div><div class="cs-val ${nc}">${signed(a.net)}</div>
         <div class="cs-sub">ROI ${(roi>=0?'+':'')+(roi*100).toFixed(1)}%</div></div>
     </div>
-    ${c && c.count ? `<div class="camp-note">
+    ${campNotes(linhas, c, off)}`;
+}
+
+// As duas notas de conferência da campanha, sem o bloco de números em volta —
+// no modal do dia os valores já vêm do painel da vertente.
+function campNotes(linhas, c, off=[]) {
+  const a = aggCat(linhas), aOff = aggCat(off);
+  const semAum = a.apostas - a.boostCount;
+  return (c && c.count ? `<div class="camp-note">
       <strong>Conferência com a provedora:</strong> ${c.count.toLocaleString('pt-BR')} participações.
-      A vertente acima conta <strong>linhas do relatório</strong>
+      A vertente conta <strong>linhas do relatório</strong>
       (${a.apostas.toLocaleString('pt-BR')} apostas), a provedora conta <strong>apostas turbinadas</strong>
       e inclui VoidCashout — por isso os dois números não são iguais.
-      ${semAumento>0 ? `Das ${a.apostas.toLocaleString('pt-BR')} apostas destas linhas,
-        ${a.boostCount.toLocaleString('pt-BR')} receberam aumento e ${semAumento.toLocaleString('pt-BR')} vieram junto
+      ${semAum>0 ? `Das ${a.apostas.toLocaleString('pt-BR')} apostas destas linhas,
+        ${a.boostCount.toLocaleString('pt-BR')} receberam aumento e ${semAum.toLocaleString('pt-BR')} vieram junto
         por estarem no mesmo evento+mercado.` : ''}
-    </div>` : ''}`;
+    </div>` : '')
+   + (aOff.boosts ? `<div class="camp-note">
+      <strong>${aOff.boosts.toLocaleString('pt-BR')} linha${aOff.boosts!==1?'s':''} desmarcada${aOff.boosts!==1?'s':''} à mão</strong>
+      (${aOff.boostCount.toLocaleString('pt-BR')} aposta${aOff.boostCount!==1?'s':''} com aumento,
+      stake R$${fmt(aOff.stake)}, net ${signed(aOff.net)}) — contam em Sportsbook/Tipster, não aqui.
+    </div>` : '');
+}
+
+// Bloco Sportsbook + Tipster: a operação sem nenhuma linha da campanha.
+// O recorte SPB vs TIP vai no rodapé — como célula da grade ele espremia.
+function semAumBlock(arr) {
+  const a   = aggCat(arr);
+  const spb = aggCat(arr.filter(b=>catOf(b)==='sportsbook'));
+  const tip = aggCat(arr.filter(b=>catOf(b)==='tipster'));
+  const nc  = a.net>=0?'green':'red';
+  const roi = a.stake ? a.net/a.stake : 0;
+  const perna = (icone, cls, nome, x) =>
+    `<span><span class="${cls}">${icone} ${nome}</span> · ${x.boosts.toLocaleString('pt-BR')} boosts `+
+    `· ${x.apostas.toLocaleString('pt-BR')} apostas · net <strong class="${x.net>=0?'green':'red'}">${signed(x.net)}</strong></span>`;
+  return `<div class="sub-head"><span class="sub-dot"></span>⚡ + 🎯 Sportsbook + Tipster
+      <span class="camp-sub">operação sem a campanha de aumento de ganhos</span></div>
+    <div class="sub-body">
+      <div class="camp-stat"><div class="cs-lbl">Boosts</div><div class="cs-val">${a.boosts.toLocaleString('pt-BR')}</div></div>
+      <div class="camp-stat"><div class="cs-lbl">Apostas</div><div class="cs-val">${a.apostas.toLocaleString('pt-BR')}</div></div>
+      <div class="camp-stat"><div class="cs-lbl">Stake</div><div class="cs-val">R$${fmt(a.stake)}</div></div>
+      <div class="camp-stat"><div class="cs-lbl">Win</div><div class="cs-val">R$${fmt(a.win)}</div></div>
+      <div class="camp-stat"><div class="cs-lbl">Net</div><div class="cs-val ${nc}">${signed(a.net)}</div>
+        <div class="cs-sub">ROI ${(roi>=0?'+':'')+(roi*100).toFixed(1)}%</div></div>
+    </div>
+    <div class="strip-foot">${perna('⚡','c-spb','Sportsbook',spb)}${perna('🎯','c-tip','Tipster',tip)}</div>`;
 }
 
 // ── SORT ──────────────────────────────────────────────────────────────────────
@@ -696,7 +819,8 @@ function sortBy(col) {
 function renderTable() {
   const q = document.getElementById('searchInput').value.toLowerCase();
   let visible = parsedBoosts.filter(b => {
-    if (catFilter !== 'all' && catOf(b) !== catFilter) return false;
+    if (catFilter === 'semaum') { if (catOf(b) === 'aumento') return false; }
+    else if (catFilter !== 'all' && catOf(b) !== catFilter) return false;
     if (hideSingleBB && isSingleBetBuilder(b)) return false;
     if (q) return b.event.toLowerCase().includes(q) || b.market.toLowerCase().includes(q);
     return true;
@@ -734,8 +858,8 @@ function renderTable() {
       <td class="num num-val">R$${fmt(b.bonusWin)}</td>
       <td class="num num-val ${nc}">${(b.net>=0?'+':'')+'R$'+fmt(b.net)}</td>
       <td class="num">${roiTag}</td>
-      <td class="num num-val">${b.boostCount ? `<span class="aum-n">${b.boostCount.toLocaleString('pt-BR')}</span>` : '<span style="color:var(--t3)">—</span>'}</td>
-      <td class="cat-toggle">${catSeg(idx, cat)}</td>
+      <td class="num num-val">${b.boostCount ? `<span class="aum-n ${b.aumOff?'off':''}">${b.boostCount.toLocaleString('pt-BR')}</span>` : '<span style="color:var(--t3)">—</span>'}</td>
+      <td class="cat-toggle">${catSeg(idx, cat, b)}</td>
     </tr>`;
   }).join('');
 
@@ -767,29 +891,48 @@ function renderTable() {
 }
 
 // ── CLASSIFICAÇÃO ─────────────────────────────────────────────────────────────
-function catSeg(idx, cat) {
-  // Linha da campanha não é classificável: a vertente vem do dado, não da mão.
-  if (cat === 'aumento') {
-    return `<span class="cat-locked" title="Linha da campanha de aumento de ganhos — não entra em Sportsbook nem Tipster">🚀 Aumento</span>`;
-  }
-  return `<div class="seg">`+MANUAL_CATS.map(k=>{
+// Linha com aposta turbinada ganha um terceiro botão (AUM). O dado sugere a
+// vertente, mas dá para desmarcar e devolver a linha para Sportsbook/Tipster.
+function catSeg(idx, cat, b) {
+  const keys = hasBoost(b) ? ['aumento', ...MANUAL_CATS] : MANUAL_CATS;
+  return `<div class="seg">`+keys.map(k=>{
     const v = CATS[k];
-    return `<button class="seg-btn ${v.cls} ${cat===k?'on':''}" title="${v.label}" onclick="setCat(${idx},'${k}')">${v.short}</button>`;
+    const t = k==='aumento'
+      ? 'Aumento de Ganhos — detectado no arquivo. Clique em SPB ou TIP para desmarcar.'
+      : (hasBoost(b) ? `${v.label} — tira esta linha da vertente Aumento de Ganhos` : v.label);
+    return `<button class="seg-btn ${v.cls} ${cat===k?'on':''}" title="${t}" onclick="setCat(${idx},'${k}')">${v.short}</button>`;
   }).join('')+`</div>`;
 }
 function aumTag(b) {
-  return b.boostCount ? `<span class="boost-tag tag-aumento" title="${b.boostCount} de ${b.total} aposta(s) com aumento de ganhos">🚀 ${b.boostCount.toLocaleString('pt-BR')}</span>` : '';
+  if (!b.boostCount) return '';
+  const off = !!b.aumOff;
+  const t = off
+    ? `${b.boostCount} aposta(s) com aumento — linha desmarcada da vertente`
+    : `${b.boostCount} de ${b.total} aposta(s) com aumento de ganhos`;
+  return `<span class="boost-tag ${off?'tag-aumento-off':'tag-aumento'}" title="${t}">🚀 ${b.boostCount.toLocaleString('pt-BR')}</span>`;
 }
 function setCat(idx, cat) {
-  if (!CATS[cat] || !CATS[cat].manual) return;
-  if (isAumento(parsedBoosts[idx])) return;      // travada na campanha
-  parsedBoosts[idx].cat = cat;
-  renderTable(); updateSummary();
+  const b = parsedBoosts[idx];
+  if (!b || !CATS[cat]) return;
+  if (cat === 'aumento') {
+    if (!hasBoost(b)) return;                    // sem aposta turbinada não há o que remarcar
+    b.aumOff = false;
+  } else {
+    if (!CATS[cat].manual) return;
+    b.cat = cat;
+    if (hasBoost(b)) b.aumOff = true;            // escolher SPB/TIP desmarca o aumento
+  }
+  renderTable(); updateSummary(); renderVertenteStrips();
 }
 function markAll(cat) {
   if (!CATS[cat] || !CATS[cat].manual) return;
   parsedBoosts.forEach(b => { if (!isAumento(b)) b.cat = cat; });
-  renderTable(); updateSummary();
+  renderTable(); updateSummary(); renderVertenteStrips();
+}
+// Devolve todas as linhas desmarcadas para a vertente de aumento.
+function restoreAumento() {
+  parsedBoosts.forEach(b => { if (hasBoost(b)) b.aumOff = false; });
+  renderTable(); updateSummary(); renderVertenteStrips();
 }
 function setCatFilter(cat) {
   catFilter = cat;
@@ -822,10 +965,13 @@ function renderHiddenNote() {
 }
 function updateSummary() {
   const c = k => parsedBoosts.filter(b=>catOf(b)===k).length;
+  const off = parsedBoosts.filter(desmarcada).length;
   document.getElementById('saveSummary').innerHTML =
     `<strong class="c-spb">${c('sportsbook')}</strong> sportsbook &nbsp;·&nbsp; `+
     `<strong class="c-tip">${c('tipster')}</strong> tipster &nbsp;·&nbsp; `+
-    `<strong class="c-aum">${c('aumento')}</strong> aumento de ganhos`;
+    `<strong class="c-sem">${semAumento(parsedBoosts).length}</strong> sem aumento &nbsp;·&nbsp; `+
+    `<strong class="c-aum">${c('aumento')}</strong> aumento de ganhos`+
+    (off ? ` &nbsp;·&nbsp; <strong>${off}</strong> desmarcada${off!==1?'s':''}` : '');
 }
 function clearImport() {
   parsedBoosts=[]; parsedCampaign=null; catFilter='all'; hideSingleBB=false; sortCol='stake'; sortDir=-1;
@@ -836,6 +982,7 @@ function clearImport() {
   document.getElementById('btnHideSingle').classList.remove('active');
   document.getElementById('hiddenNote').classList.remove('show');
   document.getElementById('campStrip').classList.remove('show');
+  document.getElementById('semAumStrip').classList.remove('show');
   setCatFilter('all');
 }
 
@@ -887,6 +1034,7 @@ function loadDayIntoEditor(day, showToast=true) {
     boostStake: num(b.boostStake),
     boostWin: num(b.boostWin),
     boostExtra: num(b.boostExtra),
+    aumOff: !!b.aumOff,            // override manual da vertente de aumento
   }));
   // dias salvos antes da campanha não têm esse bloco — some da tela em vez de zerar
   parsedCampaign = day.campaign ? { ...day.campaign, disponivel:true } : null;
@@ -903,16 +1051,10 @@ function loadDayIntoEditor(day, showToast=true) {
   document.getElementById('fileInput').value = '';
 
   setCatFilter('all');             // já chama renderTable()
-  renderCampaignStrip();
+  renderVertenteStrips();
   updateSummary();
   switchTab('import');
   if (showToast) toast(`Dia ${day.date} carregado para edição`, 'ok');
-}
-
-async function editDay(date) {
-  const days = await loadDays();
-  const day = days.find(d => d.date === date);
-  if (day) loadDayIntoEditor(day);
 }
 
 async function saveDay() {
@@ -935,6 +1077,7 @@ async function saveDay() {
     toast(err.message,'err');
     return;
   }
+  cachedDays = null;               // histórico precisa reler
   toast('✅ '+date+' salvo!','ok');
 }
 
@@ -943,92 +1086,229 @@ function exportCurrentDay() {
   doExport(document.getElementById('dayDate').value||'sem-data', parsedBoosts);
 }
 
+// ── MESES ─────────────────────────────────────────────────────────────────────
+const MESES = ['janeiro','fevereiro','março','abril','maio','junho',
+               'julho','agosto','setembro','outubro','novembro','dezembro'];
+
+// A data do dia é texto livre no banco. Aceita 'AAAA-MM-DD' e 'DD/MM/AAAA' e
+// devolve sempre 'AAAA-MM', que é ordenável por string.
+function monthKey(dateStr) {
+  const s = (dateStr||'').toString().trim();
+  let m = s.match(/^(\d{4})[-\/.](\d{1,2})/);
+  if (m) return m[1]+'-'+String(m[2]).padStart(2,'0');
+  m = s.match(/^(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{4})/);
+  if (m) return m[3]+'-'+String(m[2]).padStart(2,'0');
+  return '';
+}
+function monthLabel(key) {
+  if (key === 'sem-data') return 'Sem data';
+  const [y,m] = key.split('-'), nome = MESES[+m-1];
+  return (nome ? nome[0].toUpperCase()+nome.slice(1) : m)+' de '+y;
+}
+function monthShort(key) {
+  if (key === 'sem-data') return 'Sem data';
+  const [y,m] = key.split('-'), nome = MESES[+m-1];
+  return (nome ? nome.slice(0,3) : m)+'/'+y;
+}
+function groupByMonth(days) {
+  const map = new Map();
+  days.forEach(d => {
+    const k = monthKey(d.date) || 'sem-data';
+    if (!map.has(k)) map.set(k, []);
+    map.get(k).push(d);
+  });
+  return [...map.entries()]
+    .sort((a,b) => b[0].localeCompare(a[0]))
+    .map(([key,ds]) => ({ key, label:monthLabel(key), short:monthShort(key),
+                          days: ds.slice().sort((a,b)=>b.date.localeCompare(a.date)) }));
+}
+function setMonthFilter(key) {
+  monthFilter = key;
+  renderHistory(false);            // usa o cache — trocar de mês não vai ao banco
+}
+
 // ── HISTORY ───────────────────────────────────────────────────────────────────
-async function renderHistory() {
-  const days = await loadDays();
+async function renderHistory(reload = true) {
+  if (reload || !cachedDays) cachedDays = await loadDays();
+  const days    = cachedDays;
   const cards   = document.getElementById('histCards');
-  const pills   = document.getElementById('dayPills');
+  const mPills  = document.getElementById('monthPills');
   const content = document.getElementById('histContent');
 
   if (!days.length) {
-    cards.innerHTML=pills.innerHTML='';
+    cards.innerHTML=mPills.innerHTML='';
     content.innerHTML='<div class="empty"><div class="e-icon">📭</div><h3>Nenhum dia salvo</h3><p>Importe um export e salve o dia.</p></div>';
     return;
   }
 
-  const all = days.flatMap(d=>d.boosts);
-  const aAll = aggCat(all);
+  const months = groupByMonth(days);
+  if (monthFilter !== 'all' && !months.some(m=>m.key===monthFilter)) monthFilter = 'all';
+  const shownMonths = monthFilter==='all' ? months : months.filter(m=>m.key===monthFilter);
+  const shownDays   = shownMonths.flatMap(m=>m.days);
 
-  // Meta strip
+  // Filtro de mês — comanda TODOS os blocos abaixo
+  mPills.innerHTML = `<span class="pill-lbl">Mês</span>`+
+    `<span class="month-pill ${monthFilter==='all'?'active':''}" onclick="setMonthFilter('all')">Todos<em>${months.length} ${months.length===1?'mês':'meses'}</em></span>`+
+    months.map(m=>`<span class="month-pill ${monthFilter===m.key?'active':''}" onclick="setMonthFilter('${m.key}')">${m.short}<em>${m.days.length}d</em></span>`).join('');
+
+  const all  = shownDays.flatMap(d=>d.boosts);
+  const aAll = aggCat(all);
+  const sem  = semAumento(all);
+
   document.getElementById('histMeta').innerHTML =
-    `<div class="m-item">📅 <strong>${days.length}</strong> dias registrados</div>`+
+    `<div class="m-item">🗓 ${monthFilter==='all' ? `<strong>${months.length}</strong> ${months.length===1?'mês':'meses'}` : `<strong>${monthLabel(monthFilter)}</strong>`}</div>`+
+    `<div class="m-item">📅 <strong>${shownDays.length}</strong> dias registrados</div>`+
     `<div class="m-item">💰 Stake total: <strong>R$${fmt(aAll.stake)}</strong></div>`;
 
-  const mkPanel = (type, label, a) => {
-    const nc = a.net>=0?'green':'red';
-    return `<div class="sum-panel panel-${type}">
-      <div class="sum-panel-head">
-        <span class="ph-dot"></span>
-        <span class="ph-title">${label}</span>
-      </div>
-      <div class="sum-panel-body">
-        <div class="sum-stat"><div class="ss-lbl">Boosts</div><div class="ss-val">${a.boosts.toLocaleString('pt-BR')}</div></div>
-        <div class="sum-stat"><div class="ss-lbl">Apostas</div><div class="ss-val">${a.apostas.toLocaleString('pt-BR')}</div></div>
-        <div class="sum-stat"><div class="ss-lbl">Stake</div><div class="ss-val">R$${fmt(a.stake)}</div></div>
-        <div class="sum-stat"><div class="ss-lbl">Net</div><div class="ss-val big ${nc}">${(a.net>=0?'+':'')+'R$'+fmt(a.net)}</div></div>
-      </div>
-    </div>`;
-  };
+  document.getElementById('btnExportHist').textContent =
+    monthFilter==='all' ? '⬇ Exportar Excel' : '⬇ Exportar '+monthShort(monthFilter);
 
   cards.innerHTML =
-    mkPanel('total',   'Total Geral', aAll)+
-    mkPanel('sport',   '⚡ Sportsbook',        aggCat(all.filter(b=>catOf(b)==='sportsbook')))+
-    mkPanel('tipster', '🎯 Tipster',           aggCat(all.filter(b=>catOf(b)==='tipster')))+
-    mkPanel('aumento', '🚀 Aumento de Ganhos', aggCat(all.filter(b=>catOf(b)==='aumento')));
+    sumPanel('total',   'Total Geral', aAll)+
+    sumPanel('semaum',  '⚡+🎯 Sportsbook + Tipster', aggCat(sem), 'sem aumento')+
+    sumPanel('sport',   '⚡ Sportsbook',        aggCat(all.filter(b=>catOf(b)==='sportsbook')))+
+    sumPanel('tipster', '🎯 Tipster',           aggCat(all.filter(b=>catOf(b)==='tipster')))+
+    sumPanel('aumento', '🚀 Aumento de Ganhos', aggCat(all.filter(b=>catOf(b)==='aumento')));
 
-  // Bloco detalhado da vertente, somado de todos os dias
-  const linhasAum = all.filter(isAumento);
-  const el = document.getElementById('histCampaign');
-  el.innerHTML = linhasAum.length ? campBlock(linhasAum, sumCampaigns(days)) : '';
-  el.classList.toggle('show', linhasAum.length>0);
-
-  pills.innerHTML =
-    `<span class="day-pill active" onclick="filterDays('all',this)">Todos</span>`+
-    days.map(d=>`<span class="day-pill" onclick="filterDays('${d.date}',this)">${d.date}</span>`).join('');
-
-  content.innerHTML = days.map(d=>renderDayCard(d)).join('');
+  // O mês mais recente já vem aberto; os demais ficam recolhidos.
+  content.innerHTML = shownMonths.map((m,i)=>renderMonthCard(m, i===0)).join('');
 }
 
-function renderDayCard(day) {
-  const agg = arr => arr.reduce((a,b)=>({total:a.total+b.total,userCount:a.userCount+(b.userCount||0),stake:a.stake+b.stake,win:a.win+b.win,bonusStake:a.bonusStake+b.bonusStake,bonusWin:a.bonusWin+b.bonusWin,net:a.net+b.net,boostCount:a.boostCount+(b.boostCount||0),boostExtra:a.boostExtra+(b.boostExtra||0)}),{total:0,userCount:0,stake:0,win:0,bonusStake:0,bonusWin:0,net:0,boostCount:0,boostExtra:0});
+function sumPanel(type, label, a, sub='') {
+  const nc = a.net>=0?'green':'red';
+  return `<div class="sum-panel panel-${type}">
+    <div class="sum-panel-head">
+      <span class="ph-dot"></span>
+      <span class="ph-title">${label}</span>
+      ${sub?`<span class="ph-sub">${sub}</span>`:''}
+    </div>
+    <div class="sum-panel-body">
+      <div class="sum-stat"><div class="ss-lbl">Boosts</div><div class="ss-val">${a.boosts.toLocaleString('pt-BR')}</div></div>
+      <div class="sum-stat"><div class="ss-lbl">Apostas</div><div class="ss-val">${a.apostas.toLocaleString('pt-BR')}</div></div>
+      <div class="sum-stat wide"><div class="ss-lbl">Stake</div><div class="ss-val">R$${fmt(a.stake)}</div></div>
+      <div class="sum-stat wide"><div class="ss-lbl">Net${a.stake?` · ROI ${((a.net/a.stake)>=0?'+':'')+((a.net/a.stake)*100).toFixed(1)}%`:''}</div><div class="ss-val big ${nc}">${signed(a.net)}</div></div>
+    </div>
+  </div>`;
+}
+
+// Card do mês: só o resumo na capa. Abrir mostra a lista de dias; abrir um dia
+// abre o modal com as linhas. Nível 1 de 3.
+function renderMonthCard(m, open) {
+  const all = m.days.flatMap(d=>d.boosts);
+  const a   = aggCat(all);
+  const nc  = a.net>=0?'green':'red';
+  const roi = a.stake ? a.net/a.stake : 0;
+  const sem = aggCat(semAumento(all));
+  const aum = aggCat(all.filter(b=>catOf(b)==='aumento'));
+  const porCat = {};
+  Object.keys(CATS).forEach(k => porCat[k] = all.filter(b=>catOf(b)===k));
+
+  return `<div class="month-card" data-month="${m.key}">
+    <div class="month-head" onclick="toggleMonth('${m.key}')">
+      <div class="mh-l">
+        <span class="mh-title">🗓 ${m.label}</span>
+        <div class="dh-chips">
+          <span class="chip chip-gray">${m.days.length} dia${m.days.length!==1?'s':''}</span>
+          <span class="chip chip-gray">${all.length} boosts</span>
+          ${Object.entries(CATS).map(([k,v])=>porCat[k].length
+            ? `<span class="chip chip-${v.cls}">${v.icon} ${porCat[k].length}</span>` : '').join('')}
+        </div>
+      </div>
+      <div class="mh-r">
+        <span class="mh-net ${nc}">Net ${signed(a.net)}</span>
+        <span class="chevron ${open?'open':''}" id="mchev-${m.key}">▾</span>
+      </div>
+    </div>
+    <div class="month-body ${open?'open':''}" id="mbody-${m.key}">
+
+      <div class="day-total-row">
+        <div class="day-total-cell"><div class="dtc-lbl">Apostas</div><div class="dtc-val">${a.apostas.toLocaleString('pt-BR')}</div></div>
+        <div class="day-total-cell"><div class="dtc-lbl">Stake</div><div class="dtc-val">R$${fmt(a.stake)}</div></div>
+        <div class="day-total-cell"><div class="dtc-lbl">Win</div><div class="dtc-val">R$${fmt(a.win)}</div></div>
+        <div class="day-total-cell"><div class="dtc-lbl c-sem">Net SPB+TIP</div><div class="dtc-val ${sem.net>=0?'green':'red'}">${signed(sem.net)}</div></div>
+        <div class="day-total-cell"><div class="dtc-lbl c-aum">Net Aumento</div><div class="dtc-val ${aum.net>=0?'green':'red'}">${signed(aum.net)}</div></div>
+        <div class="day-total-cell">
+          <div class="dtc-lbl">Net do Mês &nbsp;<span class="roi ${roi>=0?'roi-pos':'roi-neg'}">${(roi>=0?'+':'')+(roi*100).toFixed(1)}%</span></div>
+          <div class="dtc-val ${nc}">${signed(a.net)}</div>
+        </div>
+      </div>
+
+      <div class="month-days">
+        <div class="month-days-title">Dias do mês — clique para ver as linhas</div>
+        ${m.days.map(renderDayRow).join('')}
+      </div>
+    </div>
+  </div>`;
+}
+
+function toggleMonth(key) {
+  const body = document.getElementById('mbody-'+key);
+  const chev = document.getElementById('mchev-'+key);
+  const open = body.classList.toggle('open');
+  if (chev) chev.classList.toggle('open', open);
+}
+
+// Nível 2: linha compacta do dia dentro do mês.
+function renderDayRow(day) {
+  const a  = aggCat(day.boosts);
+  const nc = a.net>=0?'green':'red';
+  const porCat = {};
+  Object.keys(CATS).forEach(k => porCat[k] = day.boosts.filter(b=>catOf(b)===k).length);
+  return `<div class="day-row" data-date="${escAttr(day.date)}">
+    <div class="dr-l">
+      <span class="dr-date">📅 ${esc(day.date)}</span>
+      <div class="dh-chips">
+        <span class="chip chip-gray">${day.boosts.length} boosts</span>
+        ${Object.entries(CATS).map(([k,v])=>porCat[k]
+          ? `<span class="chip chip-${v.cls}">${v.icon} ${porCat[k]}</span>` : '').join('')}
+      </div>
+    </div>
+    <div class="dr-r">
+      <span class="dr-n">Apostas<strong>${a.apostas.toLocaleString('pt-BR')}</strong></span>
+      <span class="dr-n">Stake<strong>R$${fmt(a.stake)}</strong></span>
+      <span class="dr-net ${nc}">Net ${signed(a.net)}</span>
+      <span class="dr-go">›</span>
+    </div>
+  </div>`;
+}
+
+// Painel de uma vertente — usado no card do dia e no card do mês.
+function catPanel(key, arr) {
+  const a = aggCat(arr), meta = CATS[key];
+  const roiV = a.stake ? a.net/a.stake : 0;
+  const stats = !arr.length
+    ? `<div class="cp-empty">Nenhum boost ${meta.label} no período.</div>`
+    : `<div class="cp-grid">
+        <div><div class="cp-s-lbl">Boosts</div><div class="cp-s-val">${arr.length}</div></div>
+        <div><div class="cp-s-lbl">Apostas</div><div class="cp-s-val">${a.apostas.toLocaleString('pt-BR')}</div></div>
+        <div><div class="cp-s-lbl">Stake</div><div class="cp-s-val">R$${fmt(a.stake)}</div></div>
+        <div><div class="cp-s-lbl">Win</div><div class="cp-s-val">R$${fmt(a.win)}</div></div>
+        <div><div class="cp-s-lbl">Bonus Stake</div><div class="cp-s-val">R$${fmt(a.bonusStake)}</div></div>
+        <div><div class="cp-s-lbl">Bonus Win</div><div class="cp-s-val">R$${fmt(a.bonusWin)}</div></div>
+        ${key==='aumento'?`<div style="grid-column:1/-1"><div class="cp-s-lbl">Apostas com aumento</div><div class="cp-s-val">${a.boostCount.toLocaleString('pt-BR')} de ${a.apostas.toLocaleString('pt-BR')}</div></div>`:''}
+        <div style="grid-column:1/-1"><div class="cp-s-lbl">Net</div><div class="cp-s-val ${a.net>=0?'green':'red'} bold">${signed(a.net)}</div></div>
+        <div style="grid-column:1/-1"><div class="cp-s-lbl">ROI</div><div class="cp-s-val ${roiV>=0?'green':'red'}">${(roiV>=0?'+':'')+(roiV*100).toFixed(1)}%</div></div>
+      </div>`;
+  return `<div class="compare-panel">
+    <div class="cp-title ${meta.cls}"><span class="cp-dot"></span>${meta.icon} ${meta.label}</div>
+    ${stats}
+  </div>`;
+}
+
+// Nível 3: conteúdo do modal do dia — os totais, as vertentes e as linhas.
+function dayModalContent(day) {
   const porCat = {};
   Object.keys(CATS).forEach(k => porCat[k] = day.boosts.filter(b=>catOf(b)===k));
-  const all = agg(day.boosts);
+  const all = aggCat(day.boosts);
+  const sem = aggCat(semAumento(day.boosts));
+  const aum = aggCat(porCat.aumento);
+  const off = day.boosts.filter(desmarcada);
   const dayNet = all.net;
   const nc  = dayNet>=0?'green':'red';
   const roi = all.stake ? all.net/all.stake : 0;
-
-  const cpPanel = (key) => {
-    const arr = porCat[key], a = agg(arr), meta = CATS[key];
-    const roiV = a.stake ? a.net/a.stake : 0;
-    const stats = !arr.length
-      ? `<div class="cp-empty">Nenhum boost ${meta.label} neste dia.</div>`
-      : `<div class="cp-grid">
-          <div><div class="cp-s-lbl">Boosts</div><div class="cp-s-val">${arr.length}</div></div>
-          <div><div class="cp-s-lbl">Apostas</div><div class="cp-s-val">${a.total.toLocaleString('pt-BR')}</div></div>
-          <div><div class="cp-s-lbl">Stake</div><div class="cp-s-val">R$${fmt(a.stake)}</div></div>
-          <div><div class="cp-s-lbl">Win</div><div class="cp-s-val">R$${fmt(a.win)}</div></div>
-          <div><div class="cp-s-lbl">Bonus Stake</div><div class="cp-s-val">R$${fmt(a.bonusStake)}</div></div>
-          <div><div class="cp-s-lbl">Bonus Win</div><div class="cp-s-val">R$${fmt(a.bonusWin)}</div></div>
-          ${key==='aumento'?`<div style="grid-column:1/-1"><div class="cp-s-lbl">Apostas com aumento</div><div class="cp-s-val">${a.boostCount.toLocaleString('pt-BR')} de ${a.total.toLocaleString('pt-BR')}</div></div>`:''}
-          <div style="grid-column:1/-1"><div class="cp-s-lbl">Net</div><div class="cp-s-val ${a.net>=0?'green':'red'} bold">${(a.net>=0?'+':'')+'R$'+fmt(a.net)}</div></div>
-          <div style="grid-column:1/-1"><div class="cp-s-lbl">ROI</div><div class="cp-s-val ${roiV>=0?'green':'red'}">${(roiV>=0?'+':'')+(roiV*100).toFixed(1)}%</div></div>
-        </div>`;
-    return `<div class="compare-panel">
-      <div class="cp-title ${meta.cls}"><span class="cp-dot"></span>${meta.icon} ${meta.label}</div>
-      ${stats}
-    </div>`;
-  };
+  const roiSem = sem.stake ? sem.net/sem.stake : 0;
+  const roiAum = aum.stake ? aum.net/aum.stake : 0;
+  const notas = campNotes(porCat.aumento, day.campaign, off);
 
   const boostDetail = day.boosts.map(b=>{
     const cat = catOf(b), meta = CATS[cat];
@@ -1047,83 +1327,88 @@ function renderDayCard(day) {
     </tr>`;
   }).join('');
 
-  return `<div class="day-card" data-date="${day.date}">
-    <div class="day-head" onclick="toggleDay('${day.date}')">
-      <div class="dh-l">
-        <span class="dh-date">📅 ${day.date}</span>
-        <div class="dh-chips">
-          <span class="chip chip-gray">${day.boosts.length} boosts</span>
-          ${Object.entries(CATS).map(([k,v])=>porCat[k].length
-            ? `<span class="chip chip-${v.cls}">${v.icon} ${porCat[k].length} ${v.label.toLowerCase()}</span>` : '').join('')}
-        </div>
-      </div>
-      <div class="dh-r">
-        <span class="dh-net ${nc}">Net ${(dayNet>=0?'+':'')+'R$'+fmt(dayNet)}</span>
-        <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();editDay('${day.date.replace(/'/g, "\\'")}')">Editar</button>
-        <button class="btn btn-red btn-sm" onclick="event.stopPropagation();deleteDay('${day.date.replace(/'/g, "\\'")}')">Excluir</button>
-        <span class="chevron" id="chev-${day.date}">▾</span>
+  return `
+    <div class="day-total-row">
+      <div class="day-total-cell"><div class="dtc-lbl">Apostas</div><div class="dtc-val">${all.apostas.toLocaleString('pt-BR')}</div></div>
+      <div class="day-total-cell"><div class="dtc-lbl">Stake</div><div class="dtc-val">R$${fmt(all.stake)}</div></div>
+      <div class="day-total-cell"><div class="dtc-lbl">Win</div><div class="dtc-val">R$${fmt(all.win)}</div></div>
+      <div class="day-total-cell"><div class="dtc-lbl">Bonus Stake</div><div class="dtc-val">R$${fmt(all.bonusStake)}</div></div>
+      <div class="day-total-cell"><div class="dtc-lbl">Bonus Win</div><div class="dtc-val">R$${fmt(all.bonusWin)}</div></div>
+      <div class="day-total-cell">
+        <div class="dtc-lbl">Net Total &nbsp;<span class="roi ${roi>=0?'roi-pos':'roi-neg'}">${(roi>=0?'+':'')+(roi*100).toFixed(1)}%</span></div>
+        <div class="dtc-val ${nc}">${signed(dayNet)}</div>
       </div>
     </div>
-    <div class="day-body" id="body-${day.date}">
 
-      <!-- TOTAL ROW (all combined) -->
-      <div class="day-total-row">
-        <div class="day-total-cell"><div class="dtc-lbl">Total Apostas</div><div class="dtc-val">${all.total.toLocaleString('pt-BR')}</div></div>
-        <div class="day-total-cell"><div class="dtc-lbl">Stake</div><div class="dtc-val">R$${fmt(all.stake)}</div></div>
-        <div class="day-total-cell"><div class="dtc-lbl">Win</div><div class="dtc-val">R$${fmt(all.win)}</div></div>
-        <div class="day-total-cell"><div class="dtc-lbl">Bonus Stake</div><div class="dtc-val">R$${fmt(all.bonusStake)}</div></div>
-        <div class="day-total-cell"><div class="dtc-lbl">Bonus Win</div><div class="dtc-val">R$${fmt(all.bonusWin)}</div></div>
-        <div class="day-total-cell">
-          <div class="dtc-lbl">Net Total &nbsp;<span class="roi ${roi>=0?'roi-pos':'roi-neg'}">${(roi>=0?'+':'')+(roi*100).toFixed(1)}%</span></div>
-          <div class="dtc-val ${nc}">${(dayNet>=0?'+':'')+'R$'+fmt(dayNet)}</div>
-        </div>
+    <!-- o corte que interessa: operação normal de um lado, campanha do outro -->
+    <div class="day-total-row split-row">
+      <div class="day-total-cell">
+        <div class="dtc-lbl c-sem">⚡+🎯 Net Sportsbook + Tipster &nbsp;<span class="roi ${roiSem>=0?'roi-pos':'roi-neg'}">${(roiSem>=0?'+':'')+(roiSem*100).toFixed(1)}%</span></div>
+        <div class="dtc-val ${sem.net>=0?'green':'red'}">${signed(sem.net)}</div>
       </div>
-
-      <!-- DETALHE DA VERTENTE DE AUMENTO DE GANHOS -->
-      ${porCat.aumento.length ? `<div class="camp-strip show camp-inline">${campBlock(porCat.aumento, day.campaign)}</div>` : ''}
-
-      <!-- AS TRÊS VERTENTES (somam o total do dia) -->
-      <div class="compare-row">
-        ${Object.keys(CATS).map(cpPanel).join('')}
-      </div>
-
-      <!-- BOOST DETAIL -->
-      <div class="boost-list">
-        <div class="boost-list-title">Detalhe por boost</div>
-        <div class="inner-table-wrap">
-          <table class="inner-table">
-            <thead><tr>
-              <th style="width:40px">Tipo</th>
-              <th>Evento</th>
-              <th>Boost</th>
-              <th class="num">Apostas</th>
-              <th class="num">Stake</th>
-              <th class="num">Win</th>
-              <th class="num">Net</th>
-              <th class="num">ROI</th>
-            </tr></thead>
-            <tbody>${boostDetail}</tbody>
-          </table>
-        </div>
+      <div class="day-total-cell">
+        <div class="dtc-lbl c-aum">🚀 Net Aumento de Ganhos &nbsp;<span class="roi ${roiAum>=0?'roi-pos':'roi-neg'}">${(roiAum>=0?'+':'')+(roiAum*100).toFixed(1)}%</span></div>
+        <div class="dtc-val ${aum.net>=0?'green':'red'}">${signed(aum.net)}</div>
       </div>
     </div>
-  </div>`;
+
+    <div class="compare-row">
+      ${Object.keys(CATS).map(k=>catPanel(k, porCat[k])).join('')}
+    </div>
+
+    ${notas ? `<div class="notes-block">${notas}</div>` : ''}
+
+    <div class="boost-list">
+      <div class="boost-list-title">Detalhe por boost — ${day.boosts.length} linha${day.boosts.length!==1?'s':''}</div>
+      <div class="inner-table-wrap">
+        <table class="inner-table">
+          <thead><tr>
+            <th style="width:40px">Tipo</th>
+            <th>Evento</th>
+            <th>Boost</th>
+            <th class="num">Apostas</th>
+            <th class="num">Stake</th>
+            <th class="num">Win</th>
+            <th class="num">Net</th>
+            <th class="num">ROI</th>
+          </tr></thead>
+          <tbody>${boostDetail}</tbody>
+        </table>
+      </div>
+    </div>`;
 }
 
-function toggleDay(date) {
-  const body = document.getElementById('body-'+date);
-  const chev = document.getElementById('chev-'+date);
-  const open = body.classList.toggle('open');
-  if (chev) chev.classList.toggle('open', open);
-}
+// ── MODAL DO DIA ──────────────────────────────────────────────────────────────
+function openDayModal(date) {
+  const day = (cachedDays||[]).find(d => d.date === date);
+  if (!day) { toast('Dia não encontrado','err'); return; }
+  const porCat = {};
+  Object.keys(CATS).forEach(k => porCat[k] = day.boosts.filter(b=>catOf(b)===k).length);
 
-function filterDays(filter, el) {
-  document.querySelectorAll('.day-pill').forEach(p=>p.classList.remove('active'));
-  el.classList.add('active');
-  document.querySelectorAll('.day-card').forEach(c=>{
-    c.style.display = filter==='all'||c.dataset.date===filter ? '' : 'none';
-  });
+  document.getElementById('dayModalTitle').textContent = '📅 '+day.date;
+  document.getElementById('dayModalChips').innerHTML =
+    `<span class="chip chip-gray">${day.boosts.length} boosts</span>`+
+    Object.entries(CATS).map(([k,v])=>porCat[k]
+      ? `<span class="chip chip-${v.cls}">${v.icon} ${porCat[k]}</span>` : '').join('');
+  document.getElementById('dayModalBody').innerHTML = dayModalContent(day);
+  document.getElementById('dayModalEdit').onclick   = () => { closeDayModal(); loadDayIntoEditor(day); };
+  document.getElementById('dayModalDelete').onclick = () => { closeDayModal(); deleteDay(day.date); };
+  document.getElementById('dayModal').classList.add('show');
 }
+function closeDayModal() {
+  document.getElementById('dayModal').classList.remove('show');
+  document.getElementById('dayModalBody').innerHTML = '';
+}
+document.getElementById('dayModalClose').onclick = closeDayModal;
+document.getElementById('dayModal').onclick = e => { if (e.target.id === 'dayModal') closeDayModal(); };
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && document.getElementById('dayModal').classList.contains('show')) closeDayModal();
+});
+// Delegação: a data é texto livre, então não vai para dentro de handler inline.
+document.getElementById('histContent').addEventListener('click', e => {
+  const row = e.target.closest('.day-row');
+  if (row) openDayModal(row.dataset.date);
+});
 
 async function deleteDay(date) {
   if (!confirm(`Excluir registro de ${date}?`)) return;
@@ -1150,13 +1435,14 @@ async function clearHistory() {
 }
 
 // ── EXPORT ────────────────────────────────────────────────────────────────────
-const EXP_HEAD = ['Data','Vertente','Evento','Boost','Overall Total','Overall Users','Total Stake',
+const EXP_HEAD = ['Data','Mês','Vertente','Evento','Boost','Overall Total','Overall Users','Total Stake',
                   'Total Win','Bonus Stake','Bonus Winnings','Net','ROI%','Apostas c/ Aumento',
-                  'Stake c/ Aumento','Win c/ Aumento','Custo do Aumento'];
-const EXP_COLS = [12,14,35,55,14,14,14,14,14,14,14,10,18,18,18,18].map(w=>({wch:w}));
-const expRow = (dateStr,b) => [dateStr, CATS[catOf(b)].label, b.event, b.market, b.total, b.userCount||0,
+                  'Stake c/ Aumento','Win c/ Aumento','Custo do Aumento','Aumento Desmarcado'];
+const EXP_COLS = [12,16,14,35,55,14,14,14,14,14,14,14,10,18,18,18,18,20].map(w=>({wch:w}));
+const expRow = (dateStr,b) => [dateStr, monthLabel(monthKey(dateStr)||'sem-data'),
+  CATS[catOf(b)].label, b.event, b.market, b.total, b.userCount||0,
   b.stake, b.win, b.bonusStake, b.bonusWin, b.net, +((b.roi||0)*100).toFixed(2),
-  b.boostCount||0, b.boostStake||0, b.boostWin||0, b.boostExtra||0];
+  b.boostCount||0, b.boostStake||0, b.boostWin||0, b.boostExtra||0, desmarcada(b)?'Sim':'Não'];
 
 // Aba separada com o resumo por categoria + a campanha, para comparação direta.
 function resumoSheet(linhas, campanhas) {
@@ -1165,6 +1451,7 @@ function resumoSheet(linhas, campanhas) {
   const addRow=(lbl,arr)=>{ const a=aggCat(arr); const roi=a.stake?a.net/a.stake:0;
     out.push([lbl,a.boosts,a.apostas,a.stake,a.win,a.net,+(roi*100).toFixed(2),a.boostCount,a.boostExtra]); };
   addRow('TOTAL GERAL', linhas);
+  addRow('SPORTSBOOK + TIPSTER (sem aumento)', semAumento(linhas));
   Object.entries(CATS).forEach(([k,v])=>addRow(v.label, linhas.filter(b=>catOf(b)===k)));
   const c = campanhas;
   if (c && c.count) {
@@ -1174,6 +1461,24 @@ function resumoSheet(linhas, campanhas) {
   }
   const ws=XLSX.utils.aoa_to_sheet(out);
   ws['!cols']=[46,12,12,14,14,14,10,20,18].map(w=>({wch:w}));
+  return ws;
+}
+
+// Uma linha por mês, com o net de cada vertente e o combinado sem aumento.
+function mensalSheet(days) {
+  const out=[['RESUMO MENSAL'],
+             ['Mês','Dias','Boosts','Apostas','Stake','Win','Net','ROI%',
+              'Net Sportsbook+Tipster','Boosts SPB+TIP','Net Sportsbook','Net Tipster','Net Aumento']];
+  groupByMonth(days).forEach(m=>{
+    const all = m.days.flatMap(d=>d.boosts);
+    const a   = aggCat(all), sem = aggCat(semAumento(all));
+    const net = k => aggCat(all.filter(b=>catOf(b)===k)).net;
+    out.push([m.label, m.days.length, a.boosts, a.apostas, a.stake, a.win, a.net,
+              +((a.stake?a.net/a.stake:0)*100).toFixed(2),
+              sem.net, sem.boosts, net('sportsbook'), net('tipster'), net('aumento')]);
+  });
+  const ws=XLSX.utils.aoa_to_sheet(out);
+  ws['!cols']=[20,8,10,12,14,14,14,10,24,16,16,16,16].map(w=>({wch:w}));
   return ws;
 }
 
@@ -1187,37 +1492,47 @@ function doExport(dateStr, boosts) {
   toast('✅ Exportado','ok');
 }
 
+// Exporta o recorte em tela: com um mês selecionado, só aquele mês vai no arquivo.
 async function exportHistory() {
-  const days=await loadDays();
-  if (!days.length) { toast('Nenhum dado','err'); return; }
+  const todos = await loadDays();
+  if (!todos.length) { toast('Nenhum dado','err'); return; }
+  const days = monthFilter==='all' ? todos : todos.filter(d=>(monthKey(d.date)||'sem-data')===monthFilter);
+  if (!days.length) { toast('Nenhum dado no mês selecionado','err'); return; }
   const rows=[EXP_HEAD];
   days.forEach(d=>d.boosts.forEach(b=>rows.push(expRow(d.date,b))));
   const ws=XLSX.utils.aoa_to_sheet(rows); ws['!cols']=EXP_COLS;
   const wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb,ws,'Histórico');
   XLSX.utils.book_append_sheet(wb,resumoSheet(days.flatMap(d=>d.boosts),sumCampaigns(days)),'Resumo');
+  XLSX.utils.book_append_sheet(wb,mensalSheet(days),'Resumo Mensal');
   // campanha dia a dia
-  const camp=[['Data','Participações','Usuários','Stake','Win','Net das apostas','Custo do aumento']];
-  days.forEach(d=>{ const c=d.campaign; if(c&&c.count) camp.push([d.date,c.count,c.userCount,c.stake,c.win,c.net,-c.extra]); });
+  const camp=[['Data','Mês','Participações','Usuários','Stake','Win','Net das apostas','Custo do aumento']];
+  days.forEach(d=>{ const c=d.campaign; if(c&&c.count)
+    camp.push([d.date,monthLabel(monthKey(d.date)||'sem-data'),c.count,c.userCount,c.stake,c.win,c.net,-c.extra]); });
   if (camp.length>1) {
     const wsC=XLSX.utils.aoa_to_sheet(camp);
-    wsC['!cols']=[12,16,12,14,14,18,18].map(w=>({wch:w}));
+    wsC['!cols']=[12,16,16,12,14,14,18,18].map(w=>({wch:w}));
     XLSX.utils.book_append_sheet(wb,wsC,'Aumento de Ganhos');
   }
-  XLSX.writeFile(wb,'boosts-historico.xlsx');
+  XLSX.writeFile(wb, monthFilter==='all' ? 'boosts-historico.xlsx' : 'boosts-'+monthFilter+'.xlsx');
   toast('✅ Excel exportado','ok');
 }
 
 // ── AGREGAÇÃO ─────────────────────────────────────────────────────────────────
 function aggCat(arr) {
+  const s = k => arr.reduce((t,b)=>t+(+b[k]||0),0);
   return {
     boosts:     arr.length,
-    apostas:    arr.reduce((s,b)=>s+(b.total||0),0),
-    stake:      arr.reduce((s,b)=>s+(b.stake||0),0),
-    win:        arr.reduce((s,b)=>s+(b.win||0),0),
-    net:        arr.reduce((s,b)=>s+(b.net||0),0),
-    boostCount: arr.reduce((s,b)=>s+(b.boostCount||0),0),
-    boostExtra: arr.reduce((s,b)=>s+(b.boostExtra||0),0),
+    apostas:    s('total'),
+    userCount:  s('userCount'),
+    stake:      s('stake'),
+    win:        s('win'),
+    bonusStake: s('bonusStake'),
+    bonusWin:   s('bonusWin'),
+    net:        s('net'),
+    boostCount: s('boostCount'),
+    boostStake: s('boostStake'),
+    boostExtra: s('boostExtra'),
   };
 }
 function sumCampaigns(days) {
@@ -1273,7 +1588,10 @@ async function saveDays(days) {
 
 // ── UTILS ─────────────────────────────────────────────────────────────────────
 function fmt(n) { return (Math.round((+n||0)*100)/100).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function signed(n) { return ((+n||0)>=0?'+':'')+'R$'+fmt(n); }
 function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+// Para valores que entram em atributo/handler inline — a data vem de texto livre.
+function escAttr(s) { return esc(s).replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 function cleanMkt(m) {
   // BetBuilder chega como "BetBuilder: sel 1 | sel 2 | sel 3" numa linha só;
   // boosts simples podem vir quebrados por \n. Trata os dois separadores.
