@@ -1290,13 +1290,14 @@ async function renderHistory(reload = true) {
     sumPanel('sport',   '⚡ Sportsbook',        aggCat(all.filter(b=>catOf(b)==='sportsbook')))+
     sumPanel('tipster', '🎯 Tipster',           aggCat(all.filter(b=>catOf(b)==='tipster')))+
     sumPanel('welcome', '🎁 Welcome',           aggCat(all.filter(b=>catOf(b)==='welcome')))+
-    sumPanel('aumento', '🚀 Aumento de Ganhos', aggCat(all.filter(b=>catOf(b)==='aumento')));
+    sumPanel('aumento', '🚀 Aumento de Ganhos', aggCat(all.filter(b=>catOf(b)==='aumento')),
+             '', notaCampanhaPeriodo(shownDays));
 
   // O mês mais recente já vem aberto; os demais ficam recolhidos.
   content.innerHTML = shownMonths.map((m,i)=>renderMonthCard(m, i===0)).join('');
 }
 
-function sumPanel(type, label, a, sub='') {
+function sumPanel(type, label, a, sub='', nota='') {
   const nc = a.net>=0?'green':'red';
   return `<div class="sum-panel panel-${type}">
     <div class="sum-panel-head">
@@ -1310,6 +1311,28 @@ function sumPanel(type, label, a, sub='') {
       <div class="sum-stat wide"><div class="ss-lbl">Stake</div><div class="ss-val">R$${fmt(a.stake)}</div></div>
       <div class="sum-stat wide"><div class="ss-lbl">Net${a.stake?` · ROI ${((a.net/a.stake)>=0?'+':'')+((a.net/a.stake)*100).toFixed(1)}%`:''}</div><div class="ss-val big ${nc}">${signed(a.net)}</div></div>
     </div>
+    ${nota}
+  </div>`;
+}
+
+// O painel do Aumento soma a LINHA inteira — evento+mercado onde ao menos uma
+// aposta foi turbinada —, então inclui apostas que não receberam aumento nenhum
+// e vieram junto. É um número legítimo, mas não é o que a provedora reporta e
+// pode até ter sinal contrário. O recorte da campanha vai aqui embaixo para os
+// dois conviverem à vista, em vez de um deles ficar só na nota do dia.
+function notaCampanhaPeriodo(dias) {
+  const c = dias.reduce((s,d) => {
+    const k = d.campaign || {};
+    return { count:s.count+(k.count||0), stake:s.stake+(k.stake||0),
+             win:s.win+(k.win||0), extra:s.extra+(k.extra||0) };
+  }, {count:0, stake:0, win:0, extra:0});
+  if (!c.count) return '';
+  const net = c.stake - c.win;
+  return `<div class="camp-note">
+    <strong>Só as apostas turbinadas:</strong> ${c.count.toLocaleString('pt-BR')} participações ·
+    stake R$${fmt(c.stake)} · net <strong class="${net>=0?'green':'red'}">${signed(net)}</strong> ·
+    custo do aumento R$${fmt(c.extra)}. É este o número que fecha com o relatório da provedora;
+    o de cima soma as linhas inteiras.
   </div>`;
 }
 
