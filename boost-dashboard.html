@@ -593,15 +593,16 @@ const hasBoost = b => (b && (b.boostCount||0) > 0);
 const isAumento = b => hasBoost(b) && !b.aumOff;
 const desmarcada = b => hasBoost(b) && !!b.aumOff;
 
+// A marca feita à mão, sem olhar a campanha — é o que sobrevive a um reimport.
 // Aceita o formato novo (`cat`, qualquer vertente manual) e o antigo
 // (`tipster: true/false`, de antes das vertentes).
-const catOf = b => {
+const catManual = b => {
   if (!b) return 'sportsbook';
-  if (isAumento(b)) return 'aumento';
   if (b.cat && CATS[b.cat] && CATS[b.cat].manual) return b.cat;
   if (b.cat === undefined && b.tipster) return 'tipster';
   return 'sportsbook';
 };
+const catOf = b => (isAumento(b) ? 'aumento' : catManual(b));
 // Sportsbook + Tipster — sem Welcome e sem as linhas da campanha de aumento.
 const spbTip = arr => arr.filter(b => BASE_CATS.includes(catOf(b)));
 
@@ -627,6 +628,8 @@ dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dra
 dz.addEventListener('dragleave', () => dz.classList.remove('drag'));
 dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('drag'); const f=e.dataTransfer.files[0]; if(f) processFile(f); });
 document.getElementById('fileInput').addEventListener('change', e => { if(e.target.files[0]) processFile(e.target.files[0]); });
+// Corrigir a data na mão também precisa trazer a classificação daquele dia.
+document.getElementById('dayDate').addEventListener('change', () => herdarClassificacao());
 
 function processFile(file) {
   const reader = new FileReader();
@@ -766,6 +769,38 @@ function parseBoosts(rows) {
   renderVertenteStrips();
   renderTable();
   updateSummary();
+  herdarClassificacao();
+}
+
+// ── CLASSIFICAÇÃO HERDADA ─────────────────────────────────────────────────────
+// Reimportar um dia — para corrigir a regra da campanha, por exemplo — não pode
+// custar a marcação Sportsbook/Tipster/Welcome feita à mão. O arquivo não traz
+// essa informação: ela nasce aqui e só existe no dia salvo. Então, quando a data
+// da tela já tem registro, as marcas voltam para as linhas de mesmo
+// evento+mercado, que é a mesma chave usada para agrupar as apostas.
+// Linhas novas (ou que mudaram de mercado) ficam em Sportsbook, como sempre.
+async function herdarClassificacao() {
+  const date = document.getElementById('dayDate').value.trim();
+  if (!date || !parsedBoosts.length) return;
+  const dia = (await loadDays()).find(d => d.date === date);
+  if (!dia || !Array.isArray(dia.boosts)) return;
+
+  const antes = new Map(dia.boosts.map(b => [b.event+'|||'+b.market, b]));
+  let herdadas = 0;
+  parsedBoosts.forEach(b => {
+    const a = antes.get(b.event+'|||'+b.market);
+    if (!a) return;
+    // `aumOff` é decisão manual e vale mais que a detecção; `cat` é a vertente
+    // escolhida, que continua valendo mesmo se a linha entrar na campanha agora.
+    b.cat    = catManual(a);
+    b.aumOff = !!a.aumOff;
+    if (b.cat !== 'sportsbook' || b.aumOff) herdadas++;
+  });
+  if (!herdadas) return;
+  renderVertenteStrips();
+  renderTable();
+  updateSummary();
+  toast(`Classificação de ${date} recuperada em ${herdadas} linha${herdadas!==1?'s':''}`,'ok');
 }
 
 // ── CAMPANHA: DETECÇÃO ────────────────────────────────────────────────────────
