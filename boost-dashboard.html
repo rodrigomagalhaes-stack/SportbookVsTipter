@@ -1345,14 +1345,19 @@ function aggCampanha(dias) {
 // respondem perguntas diferentes e podem ter sinais opostos.
 function notaVertentePeriodo(a, c) {
   if (!c.apostas && !a.boosts) return '';
-  const extra = a.apostas - c.apostas;
+  // As apostas que vieram junto sem aumento saem das PRÓPRIAS linhas
+  // (`apostas − turbinadas`). Subtrair as participações da campanha daria outro
+  // número, errado: a campanha inclui VoidCashout e as linhas não, então os dois
+  // conjuntos não se encaixam.
+  const semAum = a.apostas - a.boostCount;
   return `<div class="camp-note">
-    O número acima é o que fecha com o relatório da provedora — só apostas turbinadas —
-    e inclui o custo do aumento de R$${fmt(c.extra)}.
+    O número acima é o recorte comparável ao relatório da provedora — só apostas
+    turbinadas — e inclui o custo do aumento de R$${fmt(c.extra)}.
     Os <strong>mercados inteiros</strong> onde houve aumento somam
     ${a.boosts.toLocaleString('pt-BR')} linhas e ${a.apostas.toLocaleString('pt-BR')} apostas,
     com net <strong class="${a.net>=0?'green':'red'}">${signed(a.net)}</strong>${
-      extra>0 ? ` — são ${extra.toLocaleString('pt-BR')} apostas que não receberam aumento e vieram junto` : ''}.
+      semAum>0 ? ` — ${semAum.toLocaleString('pt-BR')} dessas apostas não receberam aumento e vieram junto
+      por estarem no mesmo evento+mercado` : ''}.
     É esse recorte que soma 100% do relatório com as outras vertentes.
   </div>`;
 }
