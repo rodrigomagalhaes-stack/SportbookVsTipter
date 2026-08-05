@@ -593,15 +593,16 @@ const hasBoost = b => (b && (b.boostCount||0) > 0);
 const isAumento = b => hasBoost(b) && !b.aumOff;
 const desmarcada = b => hasBoost(b) && !!b.aumOff;
 
+// A marca feita à mão, sem olhar a campanha — é o que sobrevive a um reimport.
 // Aceita o formato novo (`cat`, qualquer vertente manual) e o antigo
 // (`tipster: true/false`, de antes das vertentes).
-const catOf = b => {
+const catManual = b => {
   if (!b) return 'sportsbook';
-  if (isAumento(b)) return 'aumento';
   if (b.cat && CATS[b.cat] && CATS[b.cat].manual) return b.cat;
   if (b.cat === undefined && b.tipster) return 'tipster';
   return 'sportsbook';
 };
+const catOf = b => (isAumento(b) ? 'aumento' : catManual(b));
 // Sportsbook + Tipster — sem Welcome e sem as linhas da campanha de aumento.
 const spbTip = arr => arr.filter(b => BASE_CATS.includes(catOf(b)));
 
@@ -627,6 +628,8 @@ dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dra
 dz.addEventListener('dragleave', () => dz.classList.remove('drag'));
 dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('drag'); const f=e.dataTransfer.files[0]; if(f) processFile(f); });
 document.getElementById('fileInput').addEventListener('change', e => { if(e.target.files[0]) processFile(e.target.files[0]); });
+// Corrigir a data na mão também precisa trazer a classificação daquele dia.
+document.getElementById('dayDate').addEventListener('change', () => herdarClassificacao());
 
 function processFile(file) {
   const reader = new FileReader();
@@ -664,11 +667,30 @@ function parseBoosts(rows) {
   if (missing.length) { toast('Colunas ausentes: '+missing.join(', '),'err'); return; }
 
   const temPreco = cPrice >= 0 && cNetPrice >= 0;
-  const ehAumento = r => temPreco && isWinBoost(r[C.market], cBetType>=0?r[cBetType]:'', r[cPrice], r[cNetPrice]);
-  const custoAumento = r =>
-    (r[C.status]||'').toString().trim()==='Win'
-      ? Math.max(0, (+r[C.win]||0) - (+r[C.stake]||0)*(+r[cPrice]||0))
-      : 0;
+  // Aposta rejeitada não chegou a existir e a provedora não conta nenhuma delas.
+  // Cobre 'Rejected' e 'RejectedByPortal'. Eram 6 falsos positivos em 06/07 e
+  // outros 6 em 29/07 — os únicos que sobravam depois de tirar o piso de pernas.
+  const rejeitada = r => /^Rejected/i.test((r[C.status]||'').toString().trim());
+  const ehAumento = r => temPreco && !rejeitada(r)
+    && isWinBoost(r[C.market], cBetType>=0?r[cBetType]:'', r[cPrice], r[cNetPrice]);
+  // Custo do aumento realizado: quanto a mais saiu do caixa por causa da cotação
+  // turbinada. O lucro pago (win − stake) escala com (cotação − 1), então a fatia
+  // que veio do aumento é 1 − (price−1)/(netPrice−1).
+  // No ganho cheio isso dá exatamente stake×(netPrice − price), igual à conta
+  // antiga; a diferença é que agora também pega ganho parcial e cashout — que a
+  // versão anterior zerava por exigir Status === 'Win' — e continua zerando
+  // reembolso (win = stake, nada foi pago a mais).
+  // Conferido contra o Betslip Boost Report de julho/26 da provedora: são 768
+  // pagamentos parciais/cashout (R$383 mil) que ficavam de fora e 851 reembolsos
+  // (R$67 mil) que não podem entrar.
+  const custoAumento = r => {
+    const win   = +r[C.win]    ||0;
+    const stake = +r[C.stake]  ||0;
+    const p     = +r[cPrice]   ||0;
+    const np    = +r[cNetPrice]||0;
+    if (win <= stake || p <= 1 || np <= p) return 0;
+    return (win - stake) * (1 - (p - 1)/(np - 1));
+  };
 
   const boostRows = rows.slice(1).filter(r => {
     const status = (r[C.status]||'').toString().trim();
@@ -747,23 +769,56 @@ function parseBoosts(rows) {
   renderVertenteStrips();
   renderTable();
   updateSummary();
+  herdarClassificacao();
+}
+
+// ── CLASSIFICAÇÃO HERDADA ─────────────────────────────────────────────────────
+// Reimportar um dia — para corrigir a regra da campanha, por exemplo — não pode
+// custar a marcação Sportsbook/Tipster/Welcome feita à mão. O arquivo não traz
+// essa informação: ela nasce aqui e só existe no dia salvo. Então, quando a data
+// da tela já tem registro, as marcas voltam para as linhas de mesmo
+// evento+mercado, que é a mesma chave usada para agrupar as apostas.
+// Linhas novas (ou que mudaram de mercado) ficam em Sportsbook, como sempre.
+async function herdarClassificacao() {
+  const date = document.getElementById('dayDate').value.trim();
+  if (!date || !parsedBoosts.length) return;
+  const dia = (await loadDays()).find(d => d.date === date);
+  if (!dia || !Array.isArray(dia.boosts)) return;
+
+  const antes = new Map(dia.boosts.map(b => [b.event+'|||'+b.market, b]));
+  let herdadas = 0;
+  parsedBoosts.forEach(b => {
+    const a = antes.get(b.event+'|||'+b.market);
+    if (!a) return;
+    // `aumOff` é decisão manual e vale mais que a detecção; `cat` é a vertente
+    // escolhida, que continua valendo mesmo se a linha entrar na campanha agora.
+    b.cat    = catManual(a);
+    b.aumOff = !!a.aumOff;
+    if (b.cat !== 'sportsbook' || b.aumOff) herdadas++;
+  });
+  if (!herdadas) return;
+  renderVertenteStrips();
+  renderTable();
+  updateSummary();
+  toast(`Classificação de ${date} recuperada em ${herdadas} linha${herdadas!==1?'s':''}`,'ok');
 }
 
 // ── CAMPANHA: DETECÇÃO ────────────────────────────────────────────────────────
 // O aumento de ganhos não aparece no nome do mercado — Golden Boost e Boosted
 // Odds já vêm com o boost embutido no Price, e 100% delas pagam stake×Price.
 // A campanha só se revela quando a cotação paga (Net Price) supera a contratada.
-function countLegs(market) {
-  return (market||'').toString().replace(/^\s*BetBuilder:\s*/i,'')
-    .split(/\n|\s\|\s/).map(l=>l.trim()).filter(Boolean).length;
-}
+// Não há piso de número de seleções. O piso de 3 pernas que existia aqui foi
+// calibrado contra um único número de cabeçalho da provedora e estava errado:
+// cruzando Bet ID a Bet ID o Betslip Boost Report de 09/07/26 contra o export
+// daquele dia, ele descartava 503 das 2.819 participações — todas BetBuilder de
+// 2 pernas, R$55.315 de stake. Sem o piso o dia fecha exato: 2.819 de 2.819,
+// zero falso positivo, stake R$210.999,36 e win R$218.062,71.
 function isWinBoost(market, betType, price, netPrice) {
   const m = (market||'').toString();
   if (!/betbuilder/i.test(m) && !/bet builder/i.test((betType||'').toString())) return false;
   if (/Golden Boost|Boosted Odds/i.test(m)) return false;   // essas são outra campanha
   const p = +price||0, np = +netPrice||0;
-  if (!(p > 0 && np > p + 1e-9)) return false;
-  return countLegs(m) >= 3;                                  // piso da campanha
+  return p > 0 && np > p + 1e-9;
 }
 
 // Atualiza os blocos de vertente da tela de importação.
