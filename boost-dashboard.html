@@ -1290,13 +1290,13 @@ async function renderHistory(reload = true) {
     sumPanel('sport',   '⚡ Sportsbook',        aggCat(all.filter(b=>catOf(b)==='sportsbook')))+
     sumPanel('tipster', '🎯 Tipster',           aggCat(all.filter(b=>catOf(b)==='tipster')))+
     sumPanel('welcome', '🎁 Welcome',           aggCat(all.filter(b=>catOf(b)==='welcome')))+
-    sumPanel('aumento', '🚀 Aumento de Ganhos', aggCat(all.filter(b=>catOf(b)==='aumento')));
+    sumPanelAumento(all.filter(b=>catOf(b)==='aumento'), shownDays);
 
   // O mês mais recente já vem aberto; os demais ficam recolhidos.
   content.innerHTML = shownMonths.map((m,i)=>renderMonthCard(m, i===0)).join('');
 }
 
-function sumPanel(type, label, a, sub='') {
+function sumPanel(type, label, a, sub='', nota='', rot={}) {
   const nc = a.net>=0?'green':'red';
   return `<div class="sum-panel panel-${type}">
     <div class="sum-panel-head">
@@ -1305,11 +1305,55 @@ function sumPanel(type, label, a, sub='') {
       ${sub?`<span class="ph-sub">${sub}</span>`:''}
     </div>
     <div class="sum-panel-body">
-      <div class="sum-stat"><div class="ss-lbl">Boosts</div><div class="ss-val">${a.boosts.toLocaleString('pt-BR')}</div></div>
-      <div class="sum-stat"><div class="ss-lbl">Apostas</div><div class="ss-val">${a.apostas.toLocaleString('pt-BR')}</div></div>
+      <div class="sum-stat"><div class="ss-lbl">${rot.l1||'Boosts'}</div><div class="ss-val">${a.boosts.toLocaleString('pt-BR')}</div></div>
+      <div class="sum-stat"><div class="ss-lbl">${rot.l2||'Apostas'}</div><div class="ss-val">${a.apostas.toLocaleString('pt-BR')}</div></div>
       <div class="sum-stat wide"><div class="ss-lbl">Stake</div><div class="ss-val">R$${fmt(a.stake)}</div></div>
       <div class="sum-stat wide"><div class="ss-lbl">Net${a.stake?` · ROI ${((a.net/a.stake)>=0?'+':'')+((a.net/a.stake)*100).toFixed(1)}%`:''}</div><div class="ss-val big ${nc}">${signed(a.net)}</div></div>
     </div>
+    ${nota}
+  </div>`;
+}
+
+// A campanha medida como a provedora mede: só as apostas que receberam aumento,
+// incluindo VoidCashout. Devolve no formato de aggCat para ocupar o lugar dela
+// no painel — `boosts` recebe os usuários e `apostas` as participações, que são
+// as duas contagens que fazem sentido aqui.
+// Painel do Aumento de Ganhos: mostra a campanha, que é o recorte comparável ao
+// relatório da provedora. Sem dados de campanha gravados (dia salvo antes da
+// coluna `campaign` existir) cai no recorte das linhas, para não zerar o painel.
+function sumPanelAumento(linhas, dias) {
+  const a = aggCat(linhas), c = aggCampanha(dias);
+  if (!c.apostas) return sumPanel('aumento', '🚀 Aumento de Ganhos', a);
+  return sumPanel('aumento', '🚀 Aumento de Ganhos', c, 'só apostas turbinadas',
+                  notaVertentePeriodo(a, c), {l1:'Usuários', l2:'Participações'});
+}
+
+function aggCampanha(dias) {
+  const c = (dias||[]).reduce((s,d) => {
+    const k = (d && d.campaign) || {};
+    return { count:s.count+(k.count||0), userCount:s.userCount+(k.userCount||0),
+             stake:s.stake+(k.stake||0), win:s.win+(k.win||0), extra:s.extra+(k.extra||0) };
+  }, {count:0, userCount:0, stake:0, win:0, extra:0});
+  return { boosts:c.userCount, apostas:c.count, userCount:c.userCount,
+           stake:c.stake, win:c.win, net:c.stake-c.win, extra:c.extra };
+}
+
+// O painel mostra a campanha; esta nota mostra o outro recorte, o das linhas
+// inteiras — evento+mercado onde ao menos uma aposta foi turbinada, trazendo
+// junto as que não receberam aumento. É esse valor que faz as quatro vertentes
+// somarem 100% do relatório, então ele precisa continuar visível: os dois
+// respondem perguntas diferentes e podem ter sinais opostos.
+function notaVertentePeriodo(a, c) {
+  if (!c.apostas && !a.boosts) return '';
+  const extra = a.apostas - c.apostas;
+  return `<div class="camp-note">
+    O número acima é o que fecha com o relatório da provedora — só apostas turbinadas —
+    e inclui o custo do aumento de R$${fmt(c.extra)}.
+    Os <strong>mercados inteiros</strong> onde houve aumento somam
+    ${a.boosts.toLocaleString('pt-BR')} linhas e ${a.apostas.toLocaleString('pt-BR')} apostas,
+    com net <strong class="${a.net>=0?'green':'red'}">${signed(a.net)}</strong>${
+      extra>0 ? ` — são ${extra.toLocaleString('pt-BR')} apostas que não receberam aumento e vieram junto` : ''}.
+    É esse recorte que soma 100% do relatório com as outras vertentes.
   </div>`;
 }
 
